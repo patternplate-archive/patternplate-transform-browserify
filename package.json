@@ -77,8 +77,12 @@
     "watch": "0.17.1"
   },
   "dependencies": {
+    "babelify": "6.4.0",
     "browserify": "13.0.0",
+    "envify": "3.4.0",
     "lodash": "4.3.0",
+    "uglifyify": "3.0.1",
+    "unreachable-branch-transform": "0.5.0",
     "vinyl": "1.1.1"
   }
 }
