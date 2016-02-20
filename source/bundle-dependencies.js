@@ -1,7 +1,7 @@
 import bundleFile from './bundle-file';
 
-export default (bundler, file) => {
-	const dependencies = Object
+function squashDependencies(file) {
+	return Object
 		.entries(file.dependencies)
 		.reduce((registry, entry) => {
 			const [, dependency] = entry;
@@ -9,9 +9,14 @@ export default (bundler, file) => {
 
 			return {
 				...registry,
-				[id]: dependency
+				[id]: dependency,
+				...squashDependencies(dependency)
 			};
 		}, {});
+}
+
+export default (bundler, file) => {
+	const dependencies = squashDependencies(file);
 
 	const bundled = Object
 		.entries(dependencies)
