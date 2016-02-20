@@ -1,3 +1,13 @@
+<a name="0.2.2"></a>
+## [0.2.2](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.2.1...v0.2.2) (2016-02-20)
+
+
+### Bug Fixes
+
+* squash dependencies recursively ([2b8ef1a](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/2b8ef1a))
+
+
+
 <a name="0.2.1"></a>
 ## [0.2.1](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.2.0...v0.2.1) (2016-02-20)
 
