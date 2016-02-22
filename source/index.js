@@ -17,8 +17,7 @@ export default application => {
 		const rewritten = rewriteImports(file);
 
 		// bundle the rewritten file
-		const bundled = await bundle(bundler, rewritten);
-		file.buffer = bundled;
+		file.buffer = await bundle(bundler, rewritten);
 		return file;
 	};
 };
