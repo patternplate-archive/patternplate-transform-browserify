@@ -1,3 +1,13 @@
+<a name="0.2.3"></a>
+## [0.2.3](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.2.2...v0.2.3) (2016-02-22)
+
+
+### Bug Fixes
+
+* detect npm package availability correctly ([b7a2e40](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/b7a2e40))
+
+
+
 <a name="0.2.2"></a>
 ## [0.2.2](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.2.1...v0.2.2) (2016-02-20)
 
