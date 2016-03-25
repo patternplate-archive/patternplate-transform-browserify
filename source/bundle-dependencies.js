@@ -18,12 +18,12 @@ function squashDependencies(file) {
 export default (bundler, file) => {
 	const dependencies = squashDependencies(file);
 
-	const bundled = Object
+	Object
 		.entries(dependencies)
-		.map(entry => {
+		.forEach(entry => {
 			const [, dependency] = entry;
-			return bundleFile(bundler, dependency);
+			bundleFile(bundler, dependency);
 		});
 
-	return bundled[bundled.length - 1];
+	return bundler;
 };
