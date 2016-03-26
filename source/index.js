@@ -10,6 +10,7 @@ export default application => {
 	return async (file, demo, configuration) => {
 		const vendorCacheKey = ['browserify', 'vendor'].join(':');
 		const applicationCacheKey = ['browserify', 'application', file.path].join(':');
+		const {cache} = application;
 
 		const transformConfig = configuration.transforms || {};
 
@@ -28,14 +29,13 @@ export default application => {
 		// rewrite imports to global names
 		const rewritten = rewriteImports(file);
 
-		const vendorCode = application.cache.get(vendorCacheKey, file.mtime) ||
-			await promiseBundle(vendorBundler);
+		const [vendorCode, applicationCode] = await Promise.all([
+			cache.get(vendorCacheKey, file.mtime) || promiseBundle(vendorBundler),
+			cache.get(applicationCacheKey, file.mtime) || bundle(bundler, rewritten)
+		]);
 
-		const applicationCode = application.cache.get(applicationCacheKey, file.mtime) ||
-			await bundle(bundler, rewritten);
-
-		application.cache.set(vendorCacheKey, file.mtime, vendorCode);
-		application.cache.set(applicationCacheKey, file.mtime, applicationCode);
+		cache.set(vendorCacheKey, file.mtime, vendorCode);
+		cache.set(applicationCacheKey, file.mtime, applicationCode);
 
 		// bundle the rewritten file
 		file.buffer = `${vendorCode}\n\n${applicationCode}`;
