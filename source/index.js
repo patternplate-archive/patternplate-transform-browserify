@@ -3,27 +3,31 @@ import createBundler from './create-bundler';
 import loadTransforms from './load-transforms';
 import rewriteImports from './rewrite-imports';
 import promiseBundle from './promise-bundle';
-
-const defaultVendors = ['react', 'react-dom', 'classnames', 'classnames/bind'];
+import findDependencies from './find-dependencies';
 
 export default application => {
 	return async (file, demo, configuration) => {
-		const vendorCacheKey = ['browserify', 'vendor'].join(':');
-		const applicationCacheKey = ['browserify', 'application', file.path].join(':');
 		const {cache} = application;
+		const {
+			transforms: transformConfig = {},
+			vendors: userVendors = [],
+			opts
+		} = configuration;
 
-		const transformConfig = configuration.transforms || {};
+		const vendors = findDependencies(file, cache, userVendors);
+
+		const vendorCacheKey = `browserify:vendor:${vendors.join(':')}`;
+		const applicationCacheKey = `browserify:application:${file.path}`;
 
 		// load browserify transforms
 		const transforms = loadTransforms(transformConfig, application);
 
-		// create bundler for external vendors
-		const vendors = configuration.vendors || defaultVendors;
-		const vendorBundler = createBundler(configuration.opts, []);
-		vendors.forEach(lib => vendorBundler.require(lib));
+		// combine all vendors into one external bundle
+		const vendorBundler = createBundler({...opts, noParse: vendors}, []);
+		vendorBundler.require(vendors);
 
 		// create configured browserify bundler
-		const bundler = createBundler(configuration.opts, transforms, application);
+		const bundler = createBundler(opts, transforms, application);
 		bundler.external(vendors);
 
 		// rewrite imports to global names
