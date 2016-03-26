@@ -1,9 +1,11 @@
+import {resolve} from 'try-require';
 import bundle from './bundle';
 import createBundler from './create-bundler';
 import loadTransforms from './load-transforms';
 import rewriteImports from './rewrite-imports';
 import promiseBundle from './promise-bundle';
 import findDependencies from './find-dependencies';
+import freshestMtime from './freshest-mtime';
 
 export default application => {
 	return async (file, demo, configuration) => {
@@ -15,6 +17,8 @@ export default application => {
 		} = configuration;
 
 		const vendors = findDependencies(file, cache, userVendors);
+		const vendorPaths = vendors.map(vendor => resolve(vendor));
+		const vendorMtime = freshestMtime(vendorPaths) || new Date(0);
 
 		const vendorCacheKey = `browserify:vendor:${vendors.join(':')}`;
 		const applicationCacheKey = `browserify:application:${file.path}`;
@@ -34,11 +38,11 @@ export default application => {
 		const rewritten = rewriteImports(file);
 
 		const [vendorCode, applicationCode] = await Promise.all([
-			cache.get(vendorCacheKey, file.mtime) || promiseBundle(vendorBundler),
+			cache.get(vendorCacheKey, vendorMtime) || promiseBundle(vendorBundler),
 			cache.get(applicationCacheKey, file.mtime) || bundle(bundler, rewritten)
 		]);
 
-		cache.set(vendorCacheKey, file.mtime, vendorCode);
+		cache.set(vendorCacheKey, vendorMtime, vendorCode);
 		cache.set(applicationCacheKey, file.mtime, applicationCode);
 
 		// bundle the rewritten file
