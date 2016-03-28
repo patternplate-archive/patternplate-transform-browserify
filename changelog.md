@@ -1,3 +1,13 @@
+<a name="0.2.4"></a>
+## [0.2.4](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.2.3...v0.2.4) (2016-03-28)
+
+
+### Bug Fixes
+
+* don't fail if file has no dependencies ([4611ad7](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/4611ad7))
+
+
+
 <a name="0.2.3"></a>
 ## [0.2.3](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.2.2...v0.2.3) (2016-02-22)
 
