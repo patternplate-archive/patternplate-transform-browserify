@@ -1,52 +1,158 @@
-import {resolve} from 'try-require';
-import bundle from './bundle';
+import {dirname} from 'path';
+import Vinyl from 'vinyl';
+
 import createBundler from './create-bundler';
+import concatBundles from './concat-bundles';
 import loadTransforms from './load-transforms';
-import rewriteImports from './rewrite-imports';
 import promiseBundle from './promise-bundle';
 import findDependencies from './find-dependencies';
-import freshestMtime from './freshest-mtime';
+
+const detect = /^((?:import|(?:.*?)require\()\s?[^=]*?["'])(.+?)(["'].*);?$/gm;
+
+async function bundleExternal({external, transforms, opts}, application, cache) {
+	const key = `browserify:externals:${external.map(item => item.expose).join(':')}`;
+	const [{mtime}] = external
+		.sort(({mtime: a}, {mtime: b}) => b.getTime() - a.getTime());
+
+	const cached = cache.get(key, mtime);
+
+	if (cached) {
+		return cached;
+	}
+
+	const bundler = createBundler(opts, transforms, application);
+
+	external.forEach(({path, expose}) => {
+		bundler.require(path, {
+			expose
+		});
+	});
+
+	const code = await promiseBundle(bundler);
+	cache.set(key, mtime, code);
+	return code.toString();
+}
+
+async function bundleInternal({external, file, internal, transforms, opts}, application, cache) {
+	const depKey = `browserify:internals:${internal.map(item => item.expose).join(':')}`;
+	const key = `browserify:module:${file.path}`;
+
+	const {fs: {node: {mtime}}} = file;
+	const [freshestDep] = internal.sort(({mtime: a}, {mtime: b}) => b.getTime() - a.getTime());
+	const depMtime = freshestDep ?
+		freshestDep.mtime :
+		new Date();
+
+	const bundler = createBundler(opts, transforms, application);
+	const depBundler = createBundler(opts, transforms, application);
+
+	// Exclude externals
+	external.forEach(({expose}) => {
+		depBundler.exclude(expose);
+		bundler.exclude(expose);
+	});
+
+	// Find collisions
+	const collisions = internal.reduce((registry, dep) => {
+		const matches = internal.filter(item => item !== dep && item.expose === dep.expose);
+		return [...registry, ...matches];
+	}, []);
+
+	// Bundle internal dependencies
+	internal.forEach(({path, buffer, expose}) => {
+		const relevantCollisions = collisions.filter(item => item.from === path);
+
+		// Handle collisions
+		buffer = relevantCollisions.length === 0 ?
+			buffer :
+			buffer.replace(detect, (...args) => {
+				const [match, before, name, after] = args;
+				const [collision] = relevantCollisions.filter(({expose}) => expose === name);
+				if (collision) {
+					const replacement = `${before}${collision.id}${after}`;
+					collision.expose = collision.id;
+					return replacement;
+				}
+				return match;
+			});
+
+		const stream = new Vinyl({
+			contents: new Buffer(buffer.toString()),
+			path
+		});
+
+		depBundler.require(stream, {
+			expose,
+			file: path
+		});
+
+		depBundler.exclude(expose);
+		bundler.exclude(expose);
+	});
+
+	// Add entry file
+	const entryStream = new Vinyl({
+		contents: new Buffer(file.buffer.toString()),
+		path: file.path
+	});
+
+	bundler.add(entryStream, {
+		file: file.path
+	});
+
+	const code = cache.get(key, mtime) ||
+		await promiseBundle(bundler);
+
+	const depCode = cache.get(depKey, depMtime) ||
+		await promiseBundle(depBundler);
+
+	cache.set(key, mtime, code);
+	cache.set(depKey, depMtime, depCode);
+
+	return concatBundles([depCode, code], {
+		path: file.path
+	});
+}
 
 export default application => {
 	return async (file, demo, configuration) => {
 		const {cache} = application;
 		const {
 			transforms: transformConfig = {},
-			vendors: userVendors = [],
 			opts
 		} = configuration;
-
-		const vendors = findDependencies(file, cache, userVendors);
-		const vendorPaths = vendors.map(vendor => resolve(vendor));
-		const vendorMtime = freshestMtime(vendorPaths) || new Date(0);
-
-		const vendorCacheKey = `browserify:vendor:${vendors.join(':')}`;
-		const applicationCacheKey = `browserify:application:${file.path}`;
 
 		// load browserify transforms
 		const transforms = loadTransforms(transformConfig, application);
 
-		// combine all vendors into one external bundle
-		const vendorBundler = createBundler({...opts, noParse: vendors}, []);
-		vendorBundler.require(vendors);
+		// find dependencies
+		const {external, internal} = await findDependencies(file, cache);
 
-		// create configured browserify bundler
-		const bundler = createBundler(opts, transforms, application);
-		bundler.external(vendors);
+		const bundlingExternal = bundleExternal({
+			external,
+			transforms,
+			opts
+		}, application, cache);
 
-		// rewrite imports to global names
-		const rewritten = rewriteImports(file);
+		const bundlingInternal = bundleInternal({
+			external,
+			internal,
+			transforms,
+			file,
+			opts
+		}, application, cache);
 
-		const [vendorCode, applicationCode] = await Promise.all([
-			cache.get(vendorCacheKey, vendorMtime) || promiseBundle(vendorBundler),
-			cache.get(applicationCacheKey, file.mtime) || bundle(bundler, rewritten)
+		const bundles = await Promise.all([
+			bundlingExternal,
+			bundlingInternal
 		]);
 
-		cache.set(vendorCacheKey, vendorMtime, vendorCode);
-		cache.set(applicationCacheKey, file.mtime, applicationCode);
+		file.buffer = concatBundles(bundles, {
+			path: file.path
+		});
 
-		// bundle the rewritten file
-		file.buffer = `${vendorCode}\n\n${applicationCode}`;
 		return file;
 	};
 };
+
+module.change_code = 1;
