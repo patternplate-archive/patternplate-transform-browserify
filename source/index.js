@@ -1,4 +1,3 @@
-import {dirname} from 'path';
 import Vinyl from 'vinyl';
 
 import createBundler from './create-bundler';
