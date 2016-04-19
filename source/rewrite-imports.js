@@ -16,4 +16,4 @@ const rewriteImports = file => {
 
 export default rewriteImports;
 
-module.change_code = 1;
+module.change_code = 1; // eslint-disable-line camelcase

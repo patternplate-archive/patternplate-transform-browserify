@@ -73,4 +73,4 @@ async function findDependencies(file, cache, internal = [], external = []) {
 
 export default findDependencies;
 
-module.change_code = 1;
+module.change_code = 1; // eslint-disable-line camelcase

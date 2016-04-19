@@ -25,4 +25,4 @@ export default function (bundles, options) {
 	].join('\n');
 }
 
-module.change_code = 1;
+module.change_code = 1; // eslint-disable-line camelcase

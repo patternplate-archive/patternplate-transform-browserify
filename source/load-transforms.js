@@ -19,3 +19,5 @@ export default (configuration, application) =>
 				throw error;
 			}
 		}, []);
+
+module.change_code = 1; // eslint-disable-line camelcase

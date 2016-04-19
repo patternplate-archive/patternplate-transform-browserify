@@ -158,4 +158,4 @@ export default application => {
 	};
 };
 
-module.change_code = 1;
+module.change_code = 1; // eslint-disable-line camelcase
