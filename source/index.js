@@ -10,8 +10,12 @@ const detect = /^((?:import|(?:.*?)require\()\s?[^=]*?["'])(.+?)(["'].*);?$/gm;
 
 async function bundleExternal({external, transforms, opts}, application, cache) {
 	const key = `browserify:externals:${external.map(item => item.expose).join(':')}`;
-	const [{mtime}] = external
+	const [freshest] = external
 		.sort(({mtime: a}, {mtime: b}) => b.getTime() - a.getTime());
+
+	const mtime = freshest ?
+		freshest.mtime :
+		new Date();
 
 	const cached = cache.get(key, mtime);
 
@@ -37,9 +41,9 @@ async function bundleInternal({external, file, internal, transforms, opts}, appl
 	const key = `browserify:module:${file.path}`;
 
 	const {fs: {node: {mtime}}} = file;
-	const [freshestDep] = internal.sort(({mtime: a}, {mtime: b}) => b.getTime() - a.getTime());
-	const depMtime = freshestDep ?
-		freshestDep.mtime :
+	const [freshest] = internal.sort(({mtime: a}, {mtime: b}) => b.getTime() - a.getTime());
+	const depMtime = freshest ?
+		freshest.mtime :
 		new Date();
 
 	const bundler = createBundler(opts, transforms, application);
