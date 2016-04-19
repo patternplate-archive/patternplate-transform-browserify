@@ -1,3 +1,25 @@
+<a name="0.3.0"></a>
+# [0.3.0](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.2.4...v0.3.0) (2016-04-19)
+
+
+### Bug Fixes
+
+* handle files without dependencies ([0918f86](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/0918f86))
+* handle sources without sourcemaps ([13c8b42](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/13c8b42))
+
+### Features
+
+* run browserify bundlers in parallel ([06fa901](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/06fa901))
+* search automatically and recursively for dependencies ([c4d012c](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/c4d012c))
+* split out vendor dependencies ([ac1c0d7](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/ac1c0d7))
+* Use mtime of youngest vendor to validate cache ([9d50bc2](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/9d50bc2))
+
+### Performance Improvements
+
+* split bundles further for better caching ([de6c0b6](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/de6c0b6))
+
+
+
 <a name="0.2.4"></a>
 ## [0.2.4](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.2.3...v0.2.4) (2016-03-28)
 
