@@ -7,8 +7,16 @@ export default function (bundles, options) {
 	bundles.forEach(bundle => {
 		const code = bundle.toString();
 		const sourceMap = convertSourceMap.fromSource(code, true);
-		const content = convertSourceMap.removeComments(code);
-		concat.add(null, content, sourceMap.toObject());
+
+		const content = sourceMap ?
+			convertSourceMap.removeComments(code) :
+			code;
+
+		const payload = sourceMap ?
+			sourceMap.toObject() :
+			null;
+
+		concat.add(null, content, payload);
 	});
 
 	return [
