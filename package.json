@@ -1,6 +1,6 @@
 {
   "name": "patternplate-transform-browserify",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "patternplate transform creating browserify bundles",
   "main": "distribution/index.js",
   "files": [
@@ -20,7 +20,7 @@
     "release": "npm version --no-git-tag-version $(conventional-recommended-bump -p angular)",
     "release:stage": "git add changelog.md package.json",
     "release:commit": "git commit --amend -m \"chore(release): v$npm_package_version\n$(conventional-changelog -p angular)\"",
-    "release:tag": "git tag -a v$npm_package_version -m $(conventional-changelog -p angular)",
+    "release:tag": "git tag -a v$npm_package_version -m \"$(conventional-changelog -p angular)\"",
     "version": "npm run changelog && npm run release:stage",
     "postversion": "npm run release:commit && npm run release:tag",
     "push": "npm run push:git && npm run push:github",
