@@ -1,24 +1,19 @@
+import {join} from 'path';
 import browserResolve from 'browser-resolve';
 
-function resolve(name, base) {
-	return new Promise(done => {
+const filename = join(process.cwd(), 'package.json');
+
+const resolve = name => {
+	return new Promise((done, reject) => {
 		browserResolve(name, {
-			filename: base
+			filename
 		}, (error, result) => {
 			if (error) {
-				done();
+				reject(error);
 			}
 			done(result);
 		});
 	});
-}
-
-resolve.tryResolve = async (...args) => {
-	try {
-		return await resolve(...args);
-	} catch (error) {
-		return null;
-	}
 };
 
 export default resolve;

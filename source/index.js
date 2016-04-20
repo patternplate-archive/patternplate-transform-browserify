@@ -1,159 +1,68 @@
-import Vinyl from 'vinyl';
+import {debuglog} from 'util';
 
-import createBundler from './create-bundler';
+import {flatten} from 'lodash';
+
+import createBundles from './create-bundles';
+import createEntry from './create-entry';
 import concatBundles from './concat-bundles';
+import getImports from './get-imports';
 import loadTransforms from './load-transforms';
-import promiseBundle from './promise-bundle';
-import findDependencies from './find-dependencies';
 
-const detect = /^((?:import|(?:.*?)require\()\s?[^=]*?["'])(.+?)(["'].*);?$/gm;
+const log = debuglog('browserify');
 
-async function bundleExternal({external, transforms, opts}, application, cache) {
-	const key = `browserify:externals:${external.map(item => item.expose).join(':')}`;
-	const [freshest] = external
-		.sort(({mtime: a}, {mtime: b}) => b.getTime() - a.getTime());
-
-	const mtime = freshest ?
-		freshest.mtime :
-		new Date();
-
-	const cached = cache.get(key, mtime);
-
-	if (cached) {
-		return cached;
+function disableBabelRuntime(config = {}, application) {
+	const {opts = {}} = config;
+	const {optional = []} = opts;
+	if (optional.includes('runtime')) {
+		opts.optional = optional.filter(item => item !== 'runtime');
+		application.log.warn([
+			'patternplate-transform-browserify removed the runtime transform',
+			'from babelify configuration, because of known bugs.',
+			'The new optional key for babelify is:',
+			JSON.stringify(opts.optional.join(', '))
+		].join(' '));
 	}
-
-	const bundler = createBundler(opts, transforms, application);
-
-	external.forEach(({path, expose}) => {
-		bundler.require(path, {
-			expose
-		});
-	});
-
-	const code = await promiseBundle(bundler);
-	cache.set(key, mtime, code);
-	return code.toString();
-}
-
-async function bundleInternal({external, file, internal, transforms, opts}, application, cache) {
-	const depKey = `browserify:internals:${internal.map(item => item.expose).join(':')}`;
-	const key = `browserify:module:${file.path}`;
-
-	const {fs: {node: {mtime}}} = file;
-	const [freshest] = internal.sort(({mtime: a}, {mtime: b}) => b.getTime() - a.getTime());
-	const depMtime = freshest ?
-		freshest.mtime :
-		new Date();
-
-	const bundler = createBundler(opts, transforms, application);
-	const depBundler = createBundler(opts, transforms, application);
-
-	// Exclude externals
-	external.forEach(({expose}) => {
-		depBundler.exclude(expose);
-		bundler.exclude(expose);
-	});
-
-	// Find collisions
-	const collisions = internal.reduce((registry, dep) => {
-		const matches = internal.filter(item => item !== dep && item.expose === dep.expose);
-		return [...registry, ...matches];
-	}, []);
-
-	// Bundle internal dependencies
-	internal.forEach(({path, buffer, expose}) => {
-		const relevantCollisions = collisions.filter(item => item.from === path);
-
-		// Handle collisions
-		buffer = relevantCollisions.length === 0 ?
-			buffer :
-			buffer.replace(detect, (...args) => {
-				const [match, before, name, after] = args;
-				const [collision] = relevantCollisions.filter(({expose}) => expose === name);
-				if (collision) {
-					const replacement = `${before}${collision.id}${after}`;
-					collision.expose = collision.id;
-					return replacement;
-				}
-				return match;
-			});
-
-		const stream = new Vinyl({
-			contents: new Buffer(buffer.toString()),
-			path
-		});
-
-		depBundler.require(stream, {
-			expose,
-			file: path
-		});
-
-		depBundler.exclude(expose);
-		bundler.exclude(expose);
-	});
-
-	// Add entry file
-	const entryStream = new Vinyl({
-		contents: new Buffer(file.buffer.toString()),
-		path: file.path
-	});
-
-	bundler.add(entryStream, {
-		file: file.path
-	});
-
-	const code = cache.get(key, mtime) ||
-		await promiseBundle(bundler);
-
-	const depCode = cache.get(depKey, depMtime) ||
-		await promiseBundle(depBundler);
-
-	cache.set(key, mtime, code);
-	cache.set(depKey, depMtime, depCode);
-
-	return concatBundles([depCode, code], {
-		path: file.path
-	});
 }
 
 export default application => {
 	return async (file, demo, configuration) => {
-		const {cache} = application;
 		const {
 			transforms: transformConfig = {},
-			opts
+			externalTransforms: externalTransformConfig = {},
+			opts: options
 		} = configuration;
 
-		// load browserify transforms
+		disableBabelRuntime(transformConfig.babelify, application);
+
 		const transforms = loadTransforms(transformConfig, application);
+		const externalTransforms = loadTransforms(externalTransformConfig, application);
 
-		// find dependencies
-		const {external, internal} = await findDependencies(file, cache);
+		const importsStart = new Date();
+		const imports = await getImports(file);
+		log(`resolved imports in ${new Date() - importsStart}ms`);
 
-		const bundlingExternal = bundleExternal({
-			external,
-			transforms,
-			opts
-		}, application, cache);
+		const bundlingBundles = createBundles(imports, options, transforms, externalTransforms, application);
+		const bundlingEntry =	createEntry(file, imports, options, transforms, application);
 
-		const bundlingInternal = bundleInternal({
-			external,
-			internal,
-			transforms,
-			file,
-			opts
-		}, application, cache);
+		const start = new Date();
+		const bundles = flatten(await Promise.all(
+			[
+				{message: 'created entry in', task: bundlingBundles},
+				{message: 'created bundles in', task: bundlingEntry}
+			].map(async ({task, message}) => {
+				const result = await task;
+				log(`${message} ${new Date() - start}ms`);
+				return result;
+			})
+		));
 
-		const bundles = await Promise.all([
-			bundlingExternal,
-			bundlingInternal
-		]);
-
-		file.buffer = concatBundles(bundles, {
+		const concatStart = new Date();
+		const buffer = await concatBundles(bundles, {
 			path: file.path
 		});
+		log(`concatenated bundles in ${new Date() - concatStart}ms`);
 
+		file.buffer = buffer;
 		return file;
 	};
 };

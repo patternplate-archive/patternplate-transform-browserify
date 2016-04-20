@@ -1,3 +1,13 @@
+<a name="0.3.2"></a>
+## [0.3.2](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.3.1...v0.3.2) (2016-04-20)
+
+
+### Bug Fixes
+
+* **generation:** bundle all files seperately for optimal cache usage ([f8aeac4](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/f8aeac4))
+
+
+
 <a name="0.3.1"></a>
 ## [0.3.1](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.3.0...v0.3.1) (2016-04-20)
 

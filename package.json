@@ -1,6 +1,6 @@
 {
   "name": "patternplate-transform-browserify",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "patternplate transform creating browserify bundles",
   "main": "distribution/index.js",
   "files": [
@@ -87,12 +87,16 @@
   },
   "dependencies": {
     "babelify": "6.4.0",
+    "babylon": "6.7.0",
+    "babylon-ast-dependencies": "1.0.2",
     "browser-resolve": "1.11.1",
     "browserify": "13.0.0",
     "concat-with-sourcemaps": "1.0.4",
     "convert-source-map": "1.2.0",
     "envify": "3.4.0",
     "lodash": "4.11.1",
+    "memoize-promise": "0.2.2",
+    "resolve": "1.1.7",
     "try-require": "1.2.1",
     "uglifyify": "3.0.1",
     "unreachable-branch-transform": "0.5.0",
