@@ -12,7 +12,7 @@
     "prebuild": "npm run test",
     "clean": "rm -r distribution",
     "build": "babel source --out-dir distribution",
-    "test": "npm run lint && npm run deps && ava test/test-*.js",
+    "test": "npm run lint && ava test/test-*.js",
     "lint": "xo source/**/*.js",
     "deps": "dependency-check . --missing && dependency-check . --extra --no-dev",
     "commit": "git-cz",
