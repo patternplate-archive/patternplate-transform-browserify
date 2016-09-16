@@ -1,17 +1,14 @@
-import {createReadStream as fsRead} from 'fs';
 import {debuglog} from 'util';
-
-import denodeify from 'denodeify';
+import {createReadStream} from 'mz/fs';
 import Vinyl from 'vinyl';
-import memoizePromise from 'memoize-promise';
 import createBundler from './create-bundler';
 import getMtime from './get-mtime';
 import promiseBundle from './promise-bundle';
 
-const readStream = memoizePromise(denodeify(fsRead));
 const log = debuglog('browserify');
 
-const getBundleFactory = (excluded, options, transforms, externalTransforms, application) => {
+const getBundleFactory = (excluded, context) => {
+	const {transforms, externalTransforms, application} = context;
 	return async (external, path, content, options) => {
 		const key = [
 			'browserify',
@@ -37,7 +34,7 @@ const getBundleFactory = (excluded, options, transforms, externalTransforms, app
 			new Buffer(typeof content === 'string' ? content : '');
 
 		const stream = external ?
-			readStream(path) :
+			createReadStream(path) :
 			new Vinyl({contents});
 
 		bundler.require(stream, options);
@@ -52,9 +49,9 @@ const getBundleFactory = (excluded, options, transforms, externalTransforms, app
 	};
 };
 
-const createBundles = async (imports, options, transforms, externalTransforms, application) => {
+const createBundles = async (imports, context) => {
 	const excluded = imports.map(item => item.options.expose);
-	const bundleFactory = getBundleFactory(excluded, options, transforms, externalTransforms, application);
+	const bundleFactory = getBundleFactory(excluded, context);
 
 	const creating = imports.map(async item => {
 		const start = new Date();

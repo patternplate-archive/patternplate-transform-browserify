@@ -25,12 +25,12 @@ function disableBabelRuntime(config = {}, application) {
 }
 
 export default application => {
-	return async (file, demo, configuration) => {
+	return async file => {
 		const {
 			transforms: transformConfig = {},
 			externalTransforms: externalTransformConfig = {},
 			opts: options
-		} = configuration;
+		} = application.configuration.transforms.browserify;
 
 		disableBabelRuntime(transformConfig.babelify, application);
 
@@ -41,25 +41,23 @@ export default application => {
 		const imports = await getImports(file);
 		log(`resolved imports in ${new Date() - importsStart}ms`);
 
-		const bundlingBundles = createBundles(imports, options, transforms, externalTransforms, application);
-		const bundlingEntry =	createEntry(file, imports, options, transforms, application);
+		const bundlingBundles = createBundles(imports, {options, transforms, externalTransforms, application});
+		const bundlingEntry =	createEntry(file, imports, {options, transforms, application});
 
 		const start = new Date();
-		const bundles = flatten(await Promise.all(
-			[
-				{message: 'created entry in', task: bundlingBundles},
-				{message: 'created bundles in', task: bundlingEntry}
-			].map(async ({task, message}) => {
+		const jobs = [
+			{message: 'created entry in', task: bundlingBundles},
+			{message: 'created bundles in', task: bundlingEntry}]
+			.map(async ({task, message}) => {
 				const result = await task;
 				log(`${message} ${new Date() - start}ms`);
 				return result;
-			})
-		));
+			});
+
+		const bundles = flatten(await Promise.all(jobs));
 
 		const concatStart = new Date();
-		const buffer = await concatBundles(bundles, {
-			path: file.path
-		});
+		const buffer = await concatBundles(bundles, {path: file.path});
 		log(`concatenated bundles in ${new Date() - concatStart}ms`);
 
 		file.buffer = buffer;

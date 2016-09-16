@@ -8,7 +8,8 @@ import promiseBundle from './promise-bundle';
 
 const log = debuglog('browserify');
 
-const createEntry = async (file, imports, options, transforms, application) => {
+const createEntry = async (file, imports, context) => {
+	const {options, transforms, application} = context;
 	const excluded = imports.map(item => item.options.expose);
 
 	const key = [
@@ -27,21 +28,24 @@ const createEntry = async (file, imports, options, transforms, application) => {
 		return cached;
 	}
 
-	const {buffer} = file;
-	const contents = Buffer.isBuffer(buffer) ?
-		buffer :
-		new Buffer(typeof buffer === 'string' ? buffer : '');
+	const buffer = Buffer.isBuffer(file.buffer) ? file.buffer : new Buffer(file.buffer);
+	const contents = buffer.length === 0 ? new Buffer(`// ${file.path}`) : buffer;
 
 	const bundler = createBundler(options, transforms);
 	const stream = new Vinyl({contents});
+
 	bundler.add(stream, {
 		file: file.path,
 		basedir: dirname(file.path),
 		noParse: true
 	});
-	excluded.forEach(name => {
+
+	bundler.exclude(file.path);
+
+	[file.path, ...excluded].forEach(name => {
 		bundler.exclude(name);
 	});
+
 	const result = promiseBundle(bundler);
 	application.cache.set(key, mtime, result);
 	return result;

@@ -14,9 +14,9 @@ export default (configuration, application) =>
 					name,
 					opts
 				}];
-			} catch (error) {
+			} catch (err) {
 				application.log.error(`Unable to load browserify transform ${name}.`);
-				throw error;
+				throw err;
 			}
 		}, []);
 

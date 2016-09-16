@@ -1,13 +1,10 @@
-import {stat as fsStat} from 'fs';
-import denodeify from 'denodeify';
-
-const stat = denodeify(fsStat);
+import fs from 'mz/fs';
 
 const getMtime = async path => {
 	try {
-		const {mtime} = await stat(path);
+		const {mtime} = await fs.stat(path);
 		return mtime;
-	} catch (error) {
+	} catch (err) {
 		return new Date();
 	}
 };
