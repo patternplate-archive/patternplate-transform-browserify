@@ -1,3 +1,9 @@
+<a name="1.0.0"></a>
+# [1.0.0](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.3.2...v1.0.0) (2016-09-16)
+
+
+
+
 <a name="0.3.3"></a>
 ## [0.3.3](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.3.2...v0.3.3) (2016-09-16)
 
