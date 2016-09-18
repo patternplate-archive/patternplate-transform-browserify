@@ -1,6 +1,0 @@
-{
-  "extends": ["angular"],
-  "rules": {
-    "scope-enum": [2, "always", ["system", "release", "detection", "generation"]]
-  }
-}

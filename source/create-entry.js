@@ -29,14 +29,19 @@ const createEntry = async (file, imports, context) => {
 	}
 
 	const buffer = Buffer.isBuffer(file.buffer) ? file.buffer : new Buffer(file.buffer);
+	const base = dirname(file.path);
 	const contents = buffer.length === 0 ? new Buffer(`// ${file.path}`) : buffer;
 
 	const bundler = createBundler(options, transforms);
-	const stream = new Vinyl({contents});
+
+	const stream = new Vinyl({
+		base,
+		path: file.path,
+		contents
+	});
 
 	bundler.add(stream, {
-		file: file.path,
-		basedir: dirname(file.path),
+		basedir: base,
 		noParse: true
 	});
 
