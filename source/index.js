@@ -34,8 +34,8 @@ export default application => {
 
 		disableBabelRuntime(transformConfig.babelify, application);
 
-		const transforms = loadTransforms(transformConfig, application);
-		const externalTransforms = loadTransforms(externalTransformConfig, application);
+		const transforms = await loadTransforms(transformConfig);
+		const externalTransforms = await loadTransforms(externalTransformConfig);
 
 		const importsStart = new Date();
 		const imports = await getImports(file);

@@ -3,14 +3,14 @@ import browserify from 'browserify';
 export default (options, transforms) => {
 	const bundler = browserify(options);
 
-	for (const transform of transforms) {
+	transforms.forEach(transform => {
 		const {fn, opts} = transform;
 		if (typeof fn.configure === 'function') {
 			bundler.transform(fn.configure(opts));
 		} else {
 			bundler.transform(fn, opts);
 		}
-	}
+	});
 
 	return bundler;
 };
