@@ -97,7 +97,7 @@
     "xo": "0.16.0"
   },
   "dependencies": {
-    "babylon": "6.10.0",
+    "babylon": "6.11.0",
     "babylon-ast-dependencies": "1.0.2",
     "browser-resolve": "1.11.2",
     "browserify": "13.1.0",
