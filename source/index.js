@@ -1,68 +1,66 @@
-import {debuglog} from 'util';
+const md5 = require('md5');
 
-import {flatten} from 'lodash';
-
-import createBundles from './create-bundles';
-import createEntry from './create-entry';
-import concatBundles from './concat-bundles';
-import getImports from './get-imports';
-import loadTransforms from './load-transforms';
-
-const log = debuglog('browserify');
-
-function disableBabelRuntime(config = {}, application) {
-	const {opts = {}} = config;
-	const {optional = []} = opts;
-	if (optional.includes('runtime')) {
-		opts.optional = optional.filter(item => item !== 'runtime');
-		application.log.warn([
-			'patternplate-transform-browserify removed the runtime transform',
-			'from babelify configuration, because of known bugs.',
-			'The new optional key for babelify is:',
-			JSON.stringify(opts.optional.join(', '))
-		].join(' '));
-	}
-}
+const bundle = require('./bundle');
+const bundleVendors = require('./bundle-vendors');
+const createBundler = require('./create-bundler');
+const createStream = require('./create-stream');
+const loadTransforms = require('./load-transforms');
 
 export default application => {
+	const config = application.configuration.transforms.browserify;
+	const opts = config.opts;
+	const bundlers = {};
+	const cachedResults = {};
+
+	const vendors = config.vendors || [];
+	const vendorBundle = bundleVendors(vendors);
+	const vendorsKey = [`vendors`, ...vendors].join(':');
+
 	return async file => {
-		const {
-			transforms: transformConfig = {},
-			externalTransforms: externalTransformConfig = {},
-			opts: options
-		} = application.configuration.transforms.browserify;
+		const hash = md5(file.buffer.toString('utf-8'));
 
-		disableBabelRuntime(transformConfig.babelify, application);
+		if (hash in cachedResults) {
+			file.buffer = Buffer.concat([
+				cachedResults[vendorsKey],
+				await cachedResults[hash]
+			]);
+			return file;
+		}
 
-		const transforms = await loadTransforms(transformConfig);
-		const externalTransforms = await loadTransforms(externalTransformConfig);
+		if (hash in bundlers) {
+			file.buffer = Buffer.concat([
+				cachedResults[vendorsKey],
+				await bundle(bundlers[hash])
+			]);
+			return file;
+		}
 
-		const importsStart = new Date();
-		const imports = await getImports(file);
-		log(`resolved imports in ${new Date() - importsStart}ms`);
+		const transforms = await loadTransforms(config.transforms);
+		const bundler = createBundler(opts, {transforms, file, bundlers});
 
-		const bundlingBundles = createBundles(imports, {options, transforms, externalTransforms, application});
-		const bundlingEntry =	createEntry(file, imports, {options, transforms, application});
+		bundler.add(createStream(file.buffer), {
+			file: file.path
+		});
 
-		const start = new Date();
-		const jobs = [
-			{message: 'created entry in', task: bundlingBundles},
-			{message: 'created bundles in', task: bundlingEntry}]
-			.map(async ({task, message}) => {
-				const result = await task;
-				log(`${message} ${new Date() - start}ms`);
-				return result;
-			});
+		vendors.forEach(vendor => {
+			bundler.external(vendor);
+		});
 
-		const bundles = flatten(await Promise.all(jobs));
+		bundler.on('update', async () => {
+			cachedResults[hash] = bundle(bundler);
+		});
 
-		const concatStart = new Date();
-		const buffer = await concatBundles(bundles, {path: file.path});
-		log(`concatenated bundles in ${new Date() - concatStart}ms`);
+		cachedResults[hash] = await bundle(bundler);
+		cachedResults[vendorsKey] = Buffer.concat([
+			await vendorBundle,
+			new Buffer(';', 'utf-8')
+		]);
 
-		file.buffer = buffer;
+		file.buffer = Buffer.concat([
+			cachedResults[vendorsKey],
+			cachedResults[hash]
+		]);
+
 		return file;
 	};
 };
-
-module.change_code = 1; // eslint-disable-line camelcase
