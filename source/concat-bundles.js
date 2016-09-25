@@ -35,5 +35,3 @@ export default function (bundles, options) {
 
 	return result;
 }
-
-module.change_code = 1; // eslint-disable-line camelcase

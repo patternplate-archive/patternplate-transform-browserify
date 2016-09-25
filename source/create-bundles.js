@@ -64,5 +64,3 @@ const createBundles = async (imports, context) => {
 };
 
 export default createBundles;
-
-module.change_code = 1; // eslint-disable-line camelcase

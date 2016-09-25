@@ -2,8 +2,9 @@ import {join} from 'path';
 import browserResolve from 'browser-resolve';
 
 const filename = join(process.cwd(), 'package.json');
+export default resolveBundle;
 
-const resolveBundle = name => {
+function resolveBundle(name) {
 	return new Promise((resolve, reject) => {
 		browserResolve(name, {
 			filename
@@ -14,7 +15,4 @@ const resolveBundle = name => {
 			resolve(result);
 		});
 	});
-};
-
-export default resolveBundle;
-module.change_code = 1; // eslint-disable-line camelcase
+}

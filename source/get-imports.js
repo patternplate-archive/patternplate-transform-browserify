@@ -82,5 +82,3 @@ const getImports = async file => {
 };
 
 export default getImports;
-
-module.change_code = 1; // eslint-disable-line camelcase

@@ -10,35 +10,28 @@ import loadTransforms from './load-transforms';
 
 const log = debuglog('browserify');
 
-function disableBabelRuntime(config = {}, application) {
-	const {opts = {}} = config;
-	const {optional = []} = opts;
-	if (optional.includes('runtime')) {
-		opts.optional = optional.filter(item => item !== 'runtime');
-		application.log.warn([
-			'patternplate-transform-browserify removed the runtime transform',
-			'from babelify configuration, because of known bugs.',
-			'The new optional key for babelify is:',
-			JSON.stringify(opts.optional.join(', '))
-		].join(' '));
-	}
-}
-
 export default application => {
+	const {
+		transforms: transformConfig = {},
+		externalTransforms: externalTransformConfig = {},
+		opts: options
+	} = application.configuration.transforms.browserify;
+	const loadingTransforms = loadTransforms(transformConfig);
+	const loadingExternalTransforms = loadTransforms(externalTransformConfig);
+
 	return async file => {
-		const {
-			transforms: transformConfig = {},
-			externalTransforms: externalTransformConfig = {},
-			opts: options
-		} = application.configuration.transforms.browserify;
-
-		disableBabelRuntime(transformConfig.babelify, application);
-
-		const transforms = await loadTransforms(transformConfig);
-		const externalTransforms = await loadTransforms(externalTransformConfig);
+		const transforms = await loadingTransforms;
+		const externalTransforms = await loadingExternalTransforms;
 
 		const importsStart = new Date();
 		const imports = await getImports(file);
+
+		imports.forEach(i => {
+			if (i.external) {
+				console.log(i.path);
+			}
+		});
+
 		log(`resolved imports in ${new Date() - importsStart}ms`);
 
 		const bundlingBundles = createBundles(imports, {options, transforms, externalTransforms, application});
@@ -64,5 +57,3 @@ export default application => {
 		return file;
 	};
 };
-
-module.change_code = 1; // eslint-disable-line camelcase

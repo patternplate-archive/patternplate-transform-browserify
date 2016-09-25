@@ -14,5 +14,3 @@ export default (options, transforms) => {
 
 	return bundler;
 };
-
-module.change_code = 1; // eslint-disable-line camelcase

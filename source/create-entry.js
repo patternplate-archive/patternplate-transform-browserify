@@ -57,5 +57,3 @@ const createEntry = async (file, imports, context) => {
 };
 
 export default createEntry;
-
-module.change_code = 1; // eslint-disable-line camelcase
