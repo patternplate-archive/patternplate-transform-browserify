@@ -8,9 +8,8 @@ import promiseBundle from './promise-bundle';
 
 const log = debuglog('browserify');
 
-const createEntry = async (file, imports, context) => {
+const createEntry = async (file, excluded, context) => {
 	const {options, transforms, application} = context;
-	const excluded = imports.map(item => item.options.expose);
 
 	const key = [
 		'browserify',

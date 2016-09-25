@@ -1,59 +1,66 @@
-import {debuglog} from 'util';
+const md5 = require('md5');
 
-import {flatten} from 'lodash';
-
-import createBundles from './create-bundles';
-import createEntry from './create-entry';
-import concatBundles from './concat-bundles';
-import getImports from './get-imports';
-import loadTransforms from './load-transforms';
-
-const log = debuglog('browserify');
+const bundle = require('./bundle');
+const bundleVendors = require('./bundle-vendors');
+const createBundler = require('./create-bundler');
+const createStream = require('./create-stream');
+const loadTransforms = require('./load-transforms');
 
 export default application => {
-	const {
-		transforms: transformConfig = {},
-		externalTransforms: externalTransformConfig = {},
-		opts: options
-	} = application.configuration.transforms.browserify;
-	const loadingTransforms = loadTransforms(transformConfig);
-	const loadingExternalTransforms = loadTransforms(externalTransformConfig);
+	const config = application.configuration.transforms.browserify;
+	const opts = config.opts;
+	const bundlers = {};
+	const cachedResults = {};
+
+	const vendors = config.vendors || [];
+	const vendorBundle = bundleVendors(vendors);
+	const vendorsKey = [`vendors`, ...vendors].join(':');
 
 	return async file => {
-		const transforms = await loadingTransforms;
-		const externalTransforms = await loadingExternalTransforms;
+		const hash = md5(file.buffer.toString('utf-8'));
 
-		const importsStart = new Date();
-		const imports = await getImports(file);
+		if (hash in cachedResults) {
+			file.buffer = Buffer.concat([
+				cachedResults[vendorsKey],
+				await cachedResults[hash]
+			]);
+			return file;
+		}
 
-		imports.forEach(i => {
-			if (i.external) {
-				console.log(i.path);
-			}
+		if (hash in bundlers) {
+			file.buffer = Buffer.concat([
+				cachedResults[vendorsKey],
+				await bundle(bundlers[hash])
+			]);
+			return file;
+		}
+
+		const transforms = await loadTransforms(config.transforms);
+		const bundler = createBundler(opts, {transforms, file, bundlers});
+
+		bundler.add(createStream(file.buffer), {
+			file: file.path
 		});
 
-		log(`resolved imports in ${new Date() - importsStart}ms`);
+		vendors.forEach(vendor => {
+			bundler.external(vendor);
+		});
 
-		const bundlingBundles = createBundles(imports, {options, transforms, externalTransforms, application});
-		const bundlingEntry =	createEntry(file, imports, {options, transforms, application});
+		bundler.on('update', async () => {
+			cachedResults[hash] = bundle(bundler);
+		});
 
-		const start = new Date();
-		const jobs = [
-			{message: 'created entry in', task: bundlingBundles},
-			{message: 'created bundles in', task: bundlingEntry}]
-			.map(async ({task, message}) => {
-				const result = await task;
-				log(`${message} ${new Date() - start}ms`);
-				return result;
-			});
+		cachedResults[hash] = await bundle(bundler);
+		cachedResults[vendorsKey] = Buffer.concat([
+			await vendorBundle,
+			new Buffer(';', 'utf-8')
+		]);
 
-		const bundles = flatten(await Promise.all(jobs));
+		file.buffer = Buffer.concat([
+			cachedResults[vendorsKey],
+			cachedResults[hash]
+		]);
 
-		const concatStart = new Date();
-		const buffer = await concatBundles(bundles, {path: file.path});
-		log(`concatenated bundles in ${new Date() - concatStart}ms`);
-
-		file.buffer = buffer;
 		return file;
 	};
 };
