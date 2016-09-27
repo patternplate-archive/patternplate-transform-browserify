@@ -1,6 +1,6 @@
 {
   "name": "patternplate-transform-browserify",
-  "version": "1.2.0",
+  "version": "0.3.4",
   "description": "patternplate transform creating browserify bundles",
   "main": "distribution/index.js",
   "files": [

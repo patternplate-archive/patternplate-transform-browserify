@@ -1,3 +1,13 @@
+<a name="0.3.4"></a>
+## [0.3.4](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.2.0...v0.3.4) (2016-09-27)
+
+
+### Bug Fixes
+
+* readd implicit dependencies for npm2 compat ([16b6b46](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/16b6b46))
+
+
+
 <a name="1.2.0"></a>
 # [1.2.0](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.0.1...v1.2.0) (2016-09-27)
 
