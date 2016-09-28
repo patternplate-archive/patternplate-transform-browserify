@@ -7,7 +7,7 @@ export default async function(configuration) {
 			return transform.enabled;
 		})
 		.map(async transformEntry => {
-			return [await resolvePackage(transformEntry[0]), transformEntry[1]];
+			return [await getPackage(transformEntry[0]), transformEntry[1]];
 		});
 
 	const resolved = await Promise.all(jobs);
@@ -20,10 +20,18 @@ export default async function(configuration) {
 	});
 }
 
-function resolvePackage(id) {
+async function getPackage(id) {
+	try {
+		return await resolvePackage(id);
+	} catch (error) {
+		return await resolvePackage(id, __dirname);
+	}
+}
+
+function resolvePackage(id, cwd) {
 	return new Promise((resolve, reject) => {
 		const opts = {
-			basedir: process.cwd()
+			basedir: cwd || process.cwd()
 		};
 		r(id, opts, (error, result) => {
 			if (error) {
