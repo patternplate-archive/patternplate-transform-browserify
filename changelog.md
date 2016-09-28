@@ -1,3 +1,14 @@
+<a name="1.1.1"></a>
+## [1.1.1](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.0.1...v1.1.1) (2016-09-28)
+
+
+### Features
+
+* enable vendor splitting (#13) ([e0b1ce8](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/e0b1ce8))
+* resolve browserify transforms from cwd ([a61409c](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/a61409c))
+
+
+
 <a name="1.1.0"></a>
 # [1.1.0](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.3.2...v1.1.0) (2016-09-25)
 
