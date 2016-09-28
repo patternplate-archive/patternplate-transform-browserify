@@ -1,3 +1,13 @@
+<a name="0.3.5"></a>
+## [0.3.5](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v0.3.4...v0.3.5) (2016-09-28)
+
+
+### Bug Fixes
+
+* allow to disable watchify ([4104af7](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/4104af7))
+
+
+
 <a name="0.3.4"></a>
 ## [0.3.4](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.2.0...v0.3.4) (2016-09-27)
 

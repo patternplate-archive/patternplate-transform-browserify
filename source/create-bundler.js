@@ -12,7 +12,11 @@ export default (options, context) => {
 		}, {});
 
 	options.plugin = options.plugin || [];
-	options.plugin.push(watchify);
+
+	if (options.watch !== false) {
+		options.plugin.push(watchify);
+	}
+
 	options.cache = {};
 	options.packageCache = {};
 

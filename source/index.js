@@ -6,8 +6,11 @@ const createBundler = require('./create-bundler');
 const createStream = require('./create-stream');
 const loadTransforms = require('./load-transforms');
 
-export default application => {
-	const config = application.configuration.transforms.browserify;
+export default () => {
+	return transformBrowserify;
+};
+
+async function transformBrowserify(file, _, config) {
 	const opts = config.opts;
 	const bundlers = {};
 	const cachedResults = {};
@@ -16,51 +19,49 @@ export default application => {
 	const vendorBundle = bundleVendors(vendors);
 	const vendorsKey = [`vendors`, ...vendors].join(':');
 
-	return async file => {
-		const hash = md5(file.buffer.toString('utf-8'));
+	const hash = md5(file.buffer.toString('utf-8'));
 
-		if (hash in cachedResults) {
-			file.buffer = Buffer.concat([
-				cachedResults[vendorsKey],
-				await cachedResults[hash]
-			]);
-			return file;
-		}
-
-		if (hash in bundlers) {
-			file.buffer = Buffer.concat([
-				cachedResults[vendorsKey],
-				await bundle(bundlers[hash])
-			]);
-			return file;
-		}
-
-		const transforms = await loadTransforms(config.transforms);
-		const bundler = createBundler(opts, {transforms, file, bundlers});
-
-		bundler.add(createStream(file.buffer), {
-			file: file.path
-		});
-
-		vendors.forEach(vendor => {
-			bundler.external(vendor);
-		});
-
-		bundler.on('update', async () => {
-			cachedResults[hash] = bundle(bundler);
-		});
-
-		cachedResults[hash] = await bundle(bundler);
-		cachedResults[vendorsKey] = Buffer.concat([
-			await vendorBundle,
-			new Buffer(';', 'utf-8')
-		]);
-
+	if (hash in cachedResults) {
 		file.buffer = Buffer.concat([
 			cachedResults[vendorsKey],
-			cachedResults[hash]
+			await cachedResults[hash]
 		]);
-
 		return file;
-	};
-};
+	}
+
+	if (hash in bundlers) {
+		file.buffer = Buffer.concat([
+			cachedResults[vendorsKey],
+			await bundle(bundlers[hash])
+		]);
+		return file;
+	}
+
+	const transforms = await loadTransforms(config.transforms);
+	const bundler = createBundler(opts, {transforms, file, bundlers});
+
+	bundler.add(createStream(file.buffer), {
+		file: file.path
+	});
+
+	vendors.forEach(vendor => {
+		bundler.external(vendor);
+	});
+
+	bundler.on('update', async () => {
+		cachedResults[hash] = bundle(bundler);
+	});
+
+	cachedResults[hash] = await bundle(bundler);
+	cachedResults[vendorsKey] = Buffer.concat([
+		await vendorBundle,
+		new Buffer(';', 'utf-8')
+	]);
+
+	file.buffer = Buffer.concat([
+		cachedResults[vendorsKey],
+		cachedResults[hash]
+	]);
+
+	return file;
+}
