@@ -1,7 +1,8 @@
-import r from 'resolve';
+const entries = require('lodash/entries');
+const r = require('resolve');
 
 export default async function(configuration) {
-	const jobs = Object.entries(configuration || {})
+	const jobs = entries(configuration || {})
 		.filter(transformEntry => {
 			const [, transform] = transformEntry;
 			return transform.enabled;

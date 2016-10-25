@@ -1,11 +1,12 @@
 const browserify = require('browserify');
+const values = require('lodash/values');
 const watchify = require('watchify');
 
-const createResolver = require('./create-resolver');
+const createResolver = require('../create-resolver');
 const getDependencyRegistry = require('./get-dependency-registry');
 
 export default (options, context) => {
-	options.fileCache = Object.values(context.file.dependencies || {})
+	options.fileCache = values(context.file.dependencies || {})
 		.reduce((fileCache, dependency) => {
 			fileCache[dependency.path] = dependency.buffer || '// beep. boop';
 			return fileCache;
