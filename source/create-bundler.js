@@ -8,7 +8,7 @@ export default (options, context) => {
 	options.fileCache = Object.values(context.file.dependencies || {})
 		.reduce((fileCache, dependency) => {
 			fileCache[dependency.path] = dependency.buffer || '// beep. boop';
-			return dependency;
+			return fileCache;
 		}, {});
 
 	options.plugin = options.plugin || [];
