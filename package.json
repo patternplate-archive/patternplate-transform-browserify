@@ -101,7 +101,7 @@
   },
   "dependencies": {
     "browser-resolve": "1.11.2",
-    "browserify": "13.1.0",
+    "browserify": "13.1.1",
     "md5": "2.2.1",
     "resolve": "1.1.7",
     "vinyl": "1.2.0",
