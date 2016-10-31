@@ -1,7 +1,7 @@
 const entries = require('lodash/entries');
 const r = require('resolve');
 
-export default async function(configuration) {
+export default async function (configuration) {
 	const jobs = entries(configuration || {})
 		.filter(transformEntry => {
 			const [, transform] = transformEntry;
@@ -16,7 +16,7 @@ export default async function(configuration) {
 	return resolved.map(entry => {
 		const [name, transform] = entry;
 		const {opts} = transform;
-		const fn = require(name);
+		const fn = require(name); // eslint-disable-line import/no-dynamic-require
 		return {fn, name, opts};
 	});
 }
