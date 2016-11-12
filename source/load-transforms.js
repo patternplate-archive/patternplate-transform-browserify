@@ -1,7 +1,19 @@
+/* @flow */
 const entries = require('lodash/entries');
 const r = require('resolve');
 
-export default async function (configuration) {
+type BrowserifyTransform = {
+	fn: Function;
+	name: string;
+	opts: Object;
+};
+
+type BrowserifyTransforms = Array<BrowserifyTransform>;
+type TransformsConfiguration = {[transformName: string]: Object};
+
+module.exports = loadTransforms;
+
+async function loadTransforms(configuration: TransformsConfiguration): Promise<BrowserifyTransforms> {
 	const jobs = entries(configuration || {})
 		.filter(transformEntry => {
 			const [, transform] = transformEntry;
@@ -16,12 +28,13 @@ export default async function (configuration) {
 	return resolved.map(entry => {
 		const [name, transform] = entry;
 		const {opts} = transform;
+		// $FlowFixMe
 		const fn = require(name); // eslint-disable-line import/no-dynamic-require
 		return {fn, name, opts};
 	});
 }
 
-function resolvePackage(id) {
+function resolvePackage(id: string): Promise<string> {
 	return new Promise((resolve, reject) => {
 		const opts = {
 			basedir: process.cwd()

@@ -1,6 +1,6 @@
 {
   "name": "patternplate-transform-browserify",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "patternplate transform creating browserify bundles",
   "main": "distribution/index.js",
   "files": [
@@ -8,11 +8,13 @@
   ],
   "scripts": {
     "start": "npm run watch",
-    "watch": "npm run build -- --watch",
+    "watch": "npm test -- --watch",
     "clean": "rm -r distribution",
     "build": "babel source --out-dir distribution",
-    "test": "npm run build && npm run lint && ava test/test-*.js",
-    "lint": "npm run deps && xo source/**/*.js",
+    "pretest": "npm run build && npm run deps && npm run lint && npm run types",
+    "test": "ava test/test-*.js",
+    "types": "flow",
+    "lint": "xo",
     "deps": "dependency-check . --missing && dependency-check . --extra --no-dev",
     "commit": "git-cz",
     "commitmsg": "conventional-changelog-lint -e",
@@ -40,7 +42,7 @@
       "stage-0"
     ],
     "plugins": [
-      "add-module-exports"
+      "transform-flow-comments"
     ]
   },
   "ava": {
@@ -49,6 +51,16 @@
       "babel-register",
       "babel-polyfill"
     ]
+  },
+  "xo": {
+    "esnext": true,
+    "parser": "babel-eslint",
+    "plugins": [
+      "flowtype-errors"
+    ],
+    "rules": {
+      "flowtype-errors/show-errors": 2
+    }
   },
   "repository": {
     "type": "git",
@@ -85,17 +97,22 @@
   "devDependencies": {
     "ava": "0.16.0",
     "babel-cli": "6.18.0",
-    "babel-plugin-add-module-exports": "0.2.1",
+    "babel-eslint": "7.1.0",
+    "babel-plugin-transform-flow-comments": "6.17.0",
+    "babel-plugin-typecheck": "3.9.0",
     "babel-polyfill": "6.16.0",
     "babel-preset-es2015-node4": "2.1.0",
     "babel-preset-stage-0": "6.16.0",
     "babel-register": "6.18.0",
+    "babel-runtime": "6.18.0",
     "conventional-changelog-cli": "1.2.0",
     "conventional-changelog-lint": "1.1.0",
     "conventional-recommended-bump": "0.3.0",
     "cz-conventional-changelog": "1.2.0",
     "cz-conventional-changelog-lint": "0.1.3",
     "dependency-check": "2.6.0",
+    "eslint-plugin-flowtype-errors": "1.5.0",
+    "flow-bin": "0.35.0",
     "husky": "0.11.9",
     "xo": "0.17.0"
   },

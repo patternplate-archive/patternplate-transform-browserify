@@ -1,3 +1,6 @@
+/* @flow */
+import type {Readable} from 'stream';
+
 const md5 = require('md5');
 
 const bundle = require('./bundle');
@@ -6,9 +9,44 @@ const createBundler = require('./create-bundler');
 const createStream = require('./create-stream');
 const loadTransforms = require('./load-transforms');
 
-export default application => {
+type BrowserifyEntry = Readable;
+
+type FileCache = {
+	[path: string]: Buffer;
+};
+
+type BrowserifyOptions = {
+	cache?: {};
+	fileCache?: FileCache;
+	packageCache?: {};
+	plugin?: Array<Function>;
+	require?: Array<BrowserifyEntry>;
+};
+
+type TransformBrowserifyOptions = {
+	opts?: BrowserifyOptions;
+	transforms?: {[transformName: string]: Object};
+	vendors?: Array<string>;
+};
+
+type Application = {
+	configuration: {
+		transforms: {
+			browserify: TransformBrowserifyOptions;
+		}
+	};
+};
+
+type File = {
+	buffer: Buffer;
+	path: string;
+};
+
+type Transform = (file: File) => Promise<File>;
+
+export default (application: Application): Transform => {
 	const config = application.configuration.transforms.browserify;
-	const opts = config.opts;
+	const opts = config.opts || {};
 	const bundlers = {};
 	const cachedResults = {};
 
@@ -35,7 +73,7 @@ export default application => {
 			return file;
 		}
 
-		const transforms = await loadTransforms(config.transforms);
+		const transforms = await loadTransforms(config.transforms || {});
 		const bundler = createBundler(opts, {transforms, file, bundlers});
 
 		bundler.add(createStream(file.buffer), {
@@ -46,7 +84,7 @@ export default application => {
 			bundler.external(vendor);
 		});
 
-		bundler.on('update', async () => {
+		bundler.on('update', () => {
 			cachedResults[hash] = bundle(bundler);
 		});
 

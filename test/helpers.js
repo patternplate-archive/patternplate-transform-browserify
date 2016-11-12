@@ -1,6 +1,16 @@
+/* @flow */
 import {merge} from 'lodash';
 
-export function getFile(extender) {
+type Map = {
+	[name: string]: any;
+};
+
+type FileMap = {
+	[name: string]: any;
+	path: string;
+};
+
+export function getFile(extender: Map): FileMap { // eslint-disable-line import/prefer-default-export
 	const file = {
 		path: 'mocks/index.js'
 	};

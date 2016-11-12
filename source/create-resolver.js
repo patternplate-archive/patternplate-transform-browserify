@@ -1,11 +1,23 @@
+/* @flow */
 const browserResolve = require('browser-resolve');
 
 module.exports = createResolver;
 
 const cwd = process.cwd();
 
-function createResolver(deps) {
-	return (id, parent, cb) => {
+type ModuleContext = {
+	id: string;
+	inNodeModules: boolean;
+};
+
+type Dependencies = {
+	[id: string]: Object;
+};
+
+type Callback = (err: null|Error, resolvedPath: string) => void;
+
+function createResolver(deps: Dependencies): Function {
+	return (id: string, parent: ModuleContext, cb: Callback): void => {
 		if (parent.inNodeModules) {
 			return browserResolve(id, parent, cb);
 		}

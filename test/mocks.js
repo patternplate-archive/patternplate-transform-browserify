@@ -1,3 +1,4 @@
+/* @flow */
 import {getFile} from './helpers';
 
 export const application = {
@@ -10,11 +11,7 @@ export const application = {
 	},
 	configuration: {
 		transforms: {
-			browserify: {
-				opts: {
-
-				}
-			}
+			browserify: {}
 		}
 	}
 };
