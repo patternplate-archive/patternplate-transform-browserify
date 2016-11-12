@@ -1,3 +1,4 @@
+/* @flow */
 import test from 'ava';
 import factory from '../source';
 import * as mocks from './mocks';
