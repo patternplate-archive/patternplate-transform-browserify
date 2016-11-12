@@ -1,3 +1,14 @@
+<a name="1.1.3"></a>
+## [1.1.3](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.1...v1.1.3) (2016-11-12)
+
+
+### Bug Fixes
+
+* construct file cache correctly ([#22](https://github.com/sinnerschrader/patternplate-transform-browserify/issues/22)) ([3871ed2](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/3871ed2))
+* harden against missing .opts ([dc6603f](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/dc6603f)), closes [sinnerschrader/patternplate#123](https://github.com/sinnerschrader/patternplate/issues/123)
+
+
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.1...v1.1.2) (2016-11-12)
 

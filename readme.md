@@ -1,5 +1,4 @@
 # patternplate-transform-browserify [![stability][0]][1]
-[patternplate](/sinnerschrader/patternplate)
 
 [![npm version][2]][3] [![Travis branch][4]][5] [![Appveyor branch][6]][7]
 
@@ -30,8 +29,8 @@ Copyright 2016 by [SinnerSchrader Deutschland GmbH](https://github.com/sinnersch
 
 [0]: https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square
 [1]: https://nodejs.org/api/documentation.html#documentation_stability_index
-[2]: https://img.shields.io/npm/v/patternplate-transform-node-sass.svg?style=flat-square
-[3]: https://npmjs.org/package/patternplate-transform-node-sass
+[2]: https://img.shields.io/npm/v/patternplate-transform-browserify.svg?style=flat-square
+[3]: https://npmjs.org/package/patternplate-transform-browserify
 [4]: https://img.shields.io/travis/sinnerschrader/patternplate-transform-browserify/master.svg?style=flat-square
 [5]: https://travis-ci.org/sinnerschrader/patternplate-transform-browserify
 [6]: https://img.shields.io/appveyor/ci/marionebl/patternplate-transform-browserify/master.svg?style=flat-square
