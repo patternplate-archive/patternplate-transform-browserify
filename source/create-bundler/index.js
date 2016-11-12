@@ -1,3 +1,7 @@
+/* eslint-disable no-use-before-define */
+/* @flow */
+import type {Readable} from 'stream';
+
 const browserify = require('browserify');
 const values = require('lodash/values');
 const watchify = require('watchify');
@@ -5,7 +9,9 @@ const watchify = require('watchify');
 const createResolver = require('../create-resolver');
 const getDependencyRegistry = require('./get-dependency-registry');
 
-export default (options, context) => {
+module.exports = createBundler;
+
+function createBundler(options: BrowserifyOptions, context: BundleContext): Bundler {
 	options.fileCache = values(context.file.dependencies || {})
 		.reduce((fileCache, dependency) => {
 			fileCache[dependency.path] = dependency.buffer || '// beep. boop';
@@ -34,4 +40,41 @@ export default (options, context) => {
 	});
 
 	return bundler;
+}
+
+type File = {
+	buffer: Buffer;
+	path: string;
+};
+
+type FileCache = {
+	[path: string]: Buffer;
+};
+
+type BrowserifyEntry = Readable;
+
+type BrowserifyOptions = {
+	cache?: {};
+	fileCache?: FileCache;
+	packageCache?: {};
+	plugin?: Array<Function>;
+	require?: Array<BrowserifyEntry>;
+};
+
+type BrowserifyTransform = {
+	fn: Function;
+	name: string;
+	opts: Object;
+};
+
+type BundleContext = {
+	file: File;
+	transforms: Array<BrowserifyTransform>
+};
+
+type Bundler = {
+	add: (entry: Readable) => void;
+	bundle: (callback: (error: Error|null, result: Buffer) => void) => void;
+	external: (id: string) => void;
+	on: (eventName: string, callback: () => void) => void;
 };
