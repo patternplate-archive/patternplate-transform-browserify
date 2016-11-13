@@ -1,3 +1,13 @@
+<a name="1.1.4"></a>
+## [1.1.4](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.3...v1.1.4) (2016-11-13)
+
+
+### Bug Fixes
+
+* avoid es5/2015 module interop issues ([08205ff](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/08205ff))
+
+
+
 <a name="1.1.3"></a>
 ## [1.1.3](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.1...v1.1.3) (2016-11-12)
 

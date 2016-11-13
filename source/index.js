@@ -9,42 +9,9 @@ const createBundler = require('./create-bundler');
 const createStream = require('./create-stream');
 const loadTransforms = require('./load-transforms');
 
-type BrowserifyEntry = Readable;
+module.exports = browserifyTransform;
 
-type FileCache = {
-	[path: string]: Buffer;
-};
-
-type BrowserifyOptions = {
-	cache?: {};
-	fileCache?: FileCache;
-	packageCache?: {};
-	plugin?: Array<Function>;
-	require?: Array<BrowserifyEntry>;
-};
-
-type TransformBrowserifyOptions = {
-	opts?: BrowserifyOptions;
-	transforms?: {[transformName: string]: Object};
-	vendors?: Array<string>;
-};
-
-type Application = {
-	configuration: {
-		transforms: {
-			browserify: TransformBrowserifyOptions;
-		}
-	};
-};
-
-type File = {
-	buffer: Buffer;
-	path: string;
-};
-
-type Transform = (file: File) => Promise<File>;
-
-export default (application: Application): Transform => {
+function browserifyTransform(application: Application): Transform {
 	const config = application.configuration.transforms.browserify;
 	const opts = config.opts || {};
 	const bundlers = {};
@@ -102,3 +69,38 @@ export default (application: Application): Transform => {
 		return file;
 	};
 };
+
+type BrowserifyEntry = Readable;
+
+type FileCache = {
+	[path: string]: Buffer;
+};
+
+type BrowserifyOptions = {
+	cache?: {};
+	fileCache?: FileCache;
+	packageCache?: {};
+	plugin?: Array<Function>;
+	require?: Array<BrowserifyEntry>;
+};
+
+type TransformBrowserifyOptions = {
+	opts?: BrowserifyOptions;
+	transforms?: {[transformName: string]: Object};
+	vendors?: Array<string>;
+};
+
+type Application = {
+	configuration: {
+		transforms: {
+			browserify: TransformBrowserifyOptions;
+		}
+	};
+};
+
+type File = {
+	buffer: Buffer;
+	path: string;
+};
+
+type Transform = (file: File) => Promise<File>;
