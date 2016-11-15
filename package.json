@@ -11,9 +11,8 @@
     "watch": "npm test -- --watch",
     "clean": "rm -r distribution",
     "build": "babel source --out-dir distribution",
-    "pretest": "npm run build && npm run deps && npm run lint && npm run types",
+    "pretest": "npm run build && npm run deps && npm run lint",
     "test": "ava test/test-*.js",
-    "types": "flow",
     "lint": "xo",
     "deps": "dependency-check . --missing && dependency-check . --extra --no-dev",
     "commit": "git-cz",
@@ -125,7 +124,6 @@
     "browser-resolve": "1.11.2",
     "browserify": "13.1.1",
     "lodash": "4.16.6",
-    "md5": "2.2.1",
     "resolve": "1.1.7",
     "string-to-stream": "1.1.0",
     "watchify": "3.7.0"

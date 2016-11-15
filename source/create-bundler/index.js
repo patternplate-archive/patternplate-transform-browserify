@@ -18,15 +18,16 @@ function createBundler(options: BrowserifyOptions, context: BundleContext): Bund
 			return fileCache;
 		}, {});
 
-	options.plugin = options.plugin || [];
-	options.plugin.push(watchify);
+	// options.plugin = options.plugin || [];
+	// options.plugin.push(watchify);
 	options.cache = {};
 	options.packageCache = {};
 
 	const dependencies = getDependencyRegistry(context.file);
 	const bundler = browserify(options);
+	bundler.plugin(watchify);
 
-	// TODO: PR for browserify allowing to override mopt.resolve
+	// PR for browserify allowing to override mopt.resolve
 	// https://github.com/substack/node-browserify/blob/7fbaee2d1373f5f186bab98d80dbffaccd058d92/index.js#L460
 	bundler._bresolve = createResolver(dependencies);
 
@@ -77,4 +78,5 @@ type Bundler = { // eslint-disable-line no-undef
 	bundle: (callback: (error: Error|null, result: Buffer) => void) => void;
 	external: (id: string) => void;
 	on: (eventName: string, callback: () => void) => void;
+	emit: (eventName: string) => void;
 };
