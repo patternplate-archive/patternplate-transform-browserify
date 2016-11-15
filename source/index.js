@@ -2,20 +2,20 @@
 /* eslint-disable no-use-before-define */
 import type {Readable} from 'stream';
 
-const md5 = require('md5');
-
+const debuglog = require('util').debuglog;
 const bundle = require('./bundle');
 const bundleVendors = require('./bundle-vendors');
 const createBundler = require('./create-bundler');
 const createStream = require('./create-stream');
 const loadTransforms = require('./load-transforms');
 
+const log = debuglog('transform-browserify');
+
 module.exports = browserifyTransform;
 
 function browserifyTransform(application: Application): Transform {
 	const config = application.configuration.transforms.browserify;
 	const opts = config.opts || {};
-	const bundlers = {};
 	const cachedResults = {};
 
 	const vendors = config.vendors || [];
@@ -23,48 +23,51 @@ function browserifyTransform(application: Application): Transform {
 	const vendorsKey = [`vendors`, ...vendors].join(':');
 
 	return async file => {
-		const hash = md5(file.buffer.toString('utf-8'));
-
-		if (hash in cachedResults) {
+		if (file.path in cachedResults) {
+			log(`Hitting cache for ${file.path}`);
 			file.buffer = Buffer.concat([
-				cachedResults[vendorsKey],
-				await cachedResults[hash]
+				await cachedResults[vendorsKey],
+				await cachedResults[file.path]
 			]);
 			return file;
 		}
 
-		if (hash in bundlers) {
-			file.buffer = Buffer.concat([
-				cachedResults[vendorsKey],
-				await bundle(bundlers[hash])
-			]);
-			return file;
-		}
+		log(`Filling cache for ${file.path}`);
 
 		const transforms = await loadTransforms(config.transforms || {});
-		const bundler = createBundler(opts, {transforms, file, bundlers});
+		const bundler = createBundler(opts, {transforms, file});
 
 		bundler.add(createStream(file.buffer), {
 			file: file.path
 		});
+
+		bundler.emit('file', file.path);
+
+		cachedResults[file.path] = bundle(bundler);
 
 		vendors.forEach(vendor => {
 			bundler.external(vendor);
 		});
 
 		bundler.on('update', () => {
-			cachedResults[hash] = bundle(bundler);
+			log(`Received update for ${file.path}`);
+			cachedResults[file.path] = bundle(bundler)
+				.then(() => {
+					bundler.emit('file', file.path);
+				});
+			log(`Processed update for ${file.path}`);
 		});
 
-		cachedResults[hash] = await bundle(bundler);
+		bundler.on('log', log);
+
 		cachedResults[vendorsKey] = Buffer.concat([
 			await vendorBundle,
 			new Buffer(';', 'utf-8')
 		]);
 
 		file.buffer = Buffer.concat([
-			cachedResults[vendorsKey],
-			cachedResults[hash]
+			await cachedResults[vendorsKey],
+			await cachedResults[file.path]
 		]);
 
 		return file;
