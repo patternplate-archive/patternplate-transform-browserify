@@ -1,4 +1,5 @@
 /* @flow */
+/* eslint-disable no-use-before-define */
 import type {Readable} from 'stream';
 
 const md5 = require('md5');
@@ -68,7 +69,7 @@ function browserifyTransform(application: Application): Transform {
 
 		return file;
 	};
-};
+}
 
 type BrowserifyEntry = Readable;
 
@@ -90,7 +91,12 @@ type TransformBrowserifyOptions = {
 	vendors?: Array<string>;
 };
 
-type Application = {
+type File = {
+	buffer: Buffer;
+	path: string;
+};
+
+type Application = { // eslint-disable-line no-undef
 	configuration: {
 		transforms: {
 			browserify: TransformBrowserifyOptions;
@@ -98,9 +104,4 @@ type Application = {
 	};
 };
 
-type File = {
-	buffer: Buffer;
-	path: string;
-};
-
-type Transform = (file: File) => Promise<File>;
+type Transform = (file: File) => Promise<File>; // eslint-disable-line no-undef

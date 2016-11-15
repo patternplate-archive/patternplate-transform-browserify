@@ -1,20 +1,9 @@
 /* @flow */
 const entries = require('lodash/entries');
 
-type File = {
-	buffer: Buffer;
-	path: string;
-};
-
-type DependencyRegistry = {
-	[path: string]: {
-		[name: string]: string;
-	}
-};
-
 module.exports = getDependencyRegistry;
 
-function getDependencyRegistry(file: File, seed: DependencyRegistry = {}): DependencyRegistry {
+function getDependencyRegistry(file: File, seed: DependencyRegistry = {}): DependencyRegistry {  // eslint-disable-line no-use-before-define
 	return entries(file.dependencies || {})
 		.reduce((registry, entry) => {
 			const [name, data] = entry;
@@ -24,3 +13,14 @@ function getDependencyRegistry(file: File, seed: DependencyRegistry = {}): Depen
 			return registry;
 		}, seed);
 }
+
+type File = { // eslint-disable-line no-undef
+	buffer: Buffer;
+	path: string;
+};
+
+type DependencyRegistry = { // eslint-disable-line no-undef
+	[path: string]: {
+		[name: string]: string;
+	}
+};

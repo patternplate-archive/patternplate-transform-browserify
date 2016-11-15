@@ -53,7 +53,7 @@ type FileCache = {
 
 type BrowserifyEntry = Readable;
 
-type BrowserifyOptions = {
+type BrowserifyOptions = { // eslint-disable-line no-undef
 	cache?: {};
 	fileCache?: FileCache;
 	packageCache?: {};
@@ -67,12 +67,12 @@ type BrowserifyTransform = {
 	opts: Object;
 };
 
-type BundleContext = {
+type BundleContext = { // eslint-disable-line no-undef
 	file: File;
 	transforms: Array<BrowserifyTransform>
 };
 
-type Bundler = {
+type Bundler = { // eslint-disable-line no-undef
 	add: (entry: Readable) => void;
 	bundle: (callback: (error: Error|null, result: Buffer) => void) => void;
 	external: (id: string) => void;

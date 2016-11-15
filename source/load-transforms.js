@@ -2,18 +2,9 @@
 const entries = require('lodash/entries');
 const r = require('resolve');
 
-type BrowserifyTransform = {
-	fn: Function;
-	name: string;
-	opts: Object;
-};
-
-type BrowserifyTransforms = Array<BrowserifyTransform>;
-type TransformsConfiguration = {[transformName: string]: Object};
-
 module.exports = loadTransforms;
 
-async function loadTransforms(configuration: TransformsConfiguration): Promise<BrowserifyTransforms> {
+async function loadTransforms(configuration: TransformsConfiguration): Promise<BrowserifyTransforms> { // eslint-disable-line no-use-before-define
 	const jobs = entries(configuration || {})
 		.filter(transformEntry => {
 			const [, transform] = transformEntry;
@@ -47,3 +38,12 @@ function resolvePackage(id: string): Promise<string> {
 		});
 	});
 }
+
+type BrowserifyTransform = {
+	fn: Function;
+	name: string;
+	opts: Object;
+};
+
+type BrowserifyTransforms = Array<BrowserifyTransform>; // eslint-disable-line no-undef
+type TransformsConfiguration = {[transformName: string]: Object}; // eslint-disable-line no-undef

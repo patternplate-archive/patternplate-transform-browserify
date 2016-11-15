@@ -1,5 +1,5 @@
 /* @flow */
-import type {Readable} from 'stream';
+import type {Readable} from 'stream'; // eslint-disable-line no-unused-vars
 
 const stringToStream = require('string-to-stream');
 
