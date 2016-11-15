@@ -18,6 +18,6 @@ export const application = {
 
 export const emptyFile = getFile({
 	buffer: '',
-	path: 'empty.js',
+	path: 'empty/index.js',
 	dependencies: {}
 });
