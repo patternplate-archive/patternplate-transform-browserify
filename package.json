@@ -119,7 +119,7 @@
   "dependencies": {
     "browser-resolve": "1.11.2",
     "browserify": "13.1.1",
-    "lodash": "4.16.6",
+    "lodash": "4.17.1",
     "md5": "2.2.1",
     "resolve": "1.1.7",
     "string-to-stream": "1.1.0",
