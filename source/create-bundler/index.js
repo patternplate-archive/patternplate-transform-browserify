@@ -4,9 +4,8 @@ import type {Readable} from 'stream';
 
 const browserify = require('browserify');
 const values = require('lodash/values');
-const watchify = require('watchify');
 
-const createResolver = require('../create-resolver');
+const createResolver = require('./create-resolver');
 const getDependencyRegistry = require('./get-dependency-registry');
 
 module.exports = createBundler;
@@ -18,14 +17,11 @@ function createBundler(options: BrowserifyOptions, context: BundleContext): Bund
 			return fileCache;
 		}, {});
 
-	// options.plugin = options.plugin || [];
-	// options.plugin.push(watchify);
 	options.cache = {};
 	options.packageCache = {};
 
 	const dependencies = getDependencyRegistry(context.file);
 	const bundler = browserify(options);
-	bundler.plugin(watchify);
 
 	// PR for browserify allowing to override mopt.resolve
 	// https://github.com/substack/node-browserify/blob/7fbaee2d1373f5f186bab98d80dbffaccd058d92/index.js#L460

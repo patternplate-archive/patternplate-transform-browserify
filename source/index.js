@@ -2,38 +2,23 @@
 /* eslint-disable no-use-before-define */
 import type {Readable} from 'stream';
 
-const debuglog = require('util').debuglog;
+const memoize = require('lodash').memoize;
 const bundle = require('./bundle');
 const bundleVendors = require('./bundle-vendors');
 const createBundler = require('./create-bundler');
 const createStream = require('./create-stream');
-const loadTransforms = require('./load-transforms');
-
-const log = debuglog('transform-browserify');
+const loadTransforms = memoize(require('./load-transforms'));
 
 module.exports = browserifyTransform;
 
 function browserifyTransform(application: Application): Transform {
 	const config = application.configuration.transforms.browserify;
 	const opts = config.opts || {};
-	const cachedResults = {};
 
-	const vendors = config.vendors || [];
-	const vendorBundle = bundleVendors(vendors);
-	const vendorsKey = [`vendors`, ...vendors].join(':');
+	const vendorsConfig = config.vendors || [];
+	const vendorBundling = bundleVendors(vendorsConfig);
 
 	return async file => {
-		if (file.path in cachedResults) {
-			log(`Hitting cache for ${file.path}`);
-			file.buffer = Buffer.concat([
-				await cachedResults[vendorsKey],
-				await cachedResults[file.path]
-			]);
-			return file;
-		}
-
-		log(`Filling cache for ${file.path}`);
-
 		const transforms = await loadTransforms(config.transforms || {});
 		const bundler = createBundler(opts, {transforms, file});
 
@@ -41,33 +26,11 @@ function browserifyTransform(application: Application): Transform {
 			file: file.path
 		});
 
-		bundler.emit('file', file.path);
-
-		cachedResults[file.path] = bundle(bundler);
-
-		vendors.forEach(vendor => {
-			bundler.external(vendor);
-		});
-
-		bundler.on('update', () => {
-			log(`Received update for ${file.path}`);
-			cachedResults[file.path] = bundle(bundler)
-				.then(() => {
-					bundler.emit('file', file.path);
-				});
-			log(`Processed update for ${file.path}`);
-		});
-
-		bundler.on('log', log);
-
-		cachedResults[vendorsKey] = Buffer.concat([
-			await vendorBundle,
-			new Buffer(';', 'utf-8')
-		]);
+		const userBundling = bundle(bundler);
 
 		file.buffer = Buffer.concat([
-			await cachedResults[vendorsKey],
-			await cachedResults[file.path]
+			await vendorBundling,
+			await userBundling
 		]);
 
 		return file;

@@ -1,3 +1,18 @@
+<a name="1.1.6"></a>
+## [1.1.6](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.4...v1.1.6) (2016-11-16)
+
+
+### Bug Fixes
+
+* revert watchify introduction ([1b85e97](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/1b85e97))
+
+
+### Performance Improvements
+
+* speed up watchify usage ([#32](https://github.com/sinnerschrader/patternplate-transform-browserify/issues/32)) ([757812d](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/757812d))
+
+
+
 <a name="1.1.5"></a>
 ## [1.1.5](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.4...v1.1.5) (2016-11-15)
 
