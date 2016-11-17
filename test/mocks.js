@@ -21,3 +21,9 @@ export const emptyFile = getFile({
 	path: 'empty/index.js',
 	dependencies: {}
 });
+
+export const emptyBufferFile = getFile({
+	buffer: new Buffer(''),
+	path: 'empty/index.js',
+	dependencies: {}
+});

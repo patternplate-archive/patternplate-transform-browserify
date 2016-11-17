@@ -5,7 +5,7 @@ type Map = {
 	[name: string]: any;
 };
 
-type FileMap = {
+type FileMap = { // eslint-disable-line no-undef
 	[name: string]: any;
 	path: string;
 };

@@ -35,3 +35,9 @@ test('the resolved object should have a buffer key', async t => {
 	const file = await transform(mocks.emptyFile);
 	t.truthy(Object.prototype.hasOwnProperty.call(file, 'buffer'));
 });
+
+test('the resolved object should have a buffer key for buffer files', async t => {
+	const transform = factory(mocks.application);
+	const file = await transform(mocks.emptyBufferFile);
+	t.truthy(Object.prototype.hasOwnProperty.call(file, 'buffer'));
+});

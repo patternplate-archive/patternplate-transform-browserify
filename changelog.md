@@ -1,3 +1,13 @@
+<a name="1.1.7"></a>
+## [1.1.7](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.6...v1.1.7) (2016-11-17)
+
+
+### Bug Fixes
+
+* ensure browserfiy reads from dependency cache ([2d9c337](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/2d9c337))
+
+
+
 <a name="1.1.6"></a>
 ## [1.1.6](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.4...v1.1.6) (2016-11-16)
 
