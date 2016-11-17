@@ -3,6 +3,7 @@
 import type {Readable} from 'stream';
 
 const browserify = require('browserify');
+const intoStream = require('into-stream');
 const values = require('lodash/values');
 
 const createResolver = require('./create-resolver');
@@ -11,21 +12,24 @@ const getDependencyRegistry = require('./get-dependency-registry');
 module.exports = createBundler;
 
 function createBundler(options: BrowserifyOptions, context: BundleContext): Bundler {
-	options.fileCache = values(context.file.dependencies || {})
-		.reduce((fileCache, dependency) => {
-			fileCache[dependency.path] = dependency.buffer || '// beep. boop';
-			return fileCache;
-		}, {});
-
-	options.cache = {};
-	options.packageCache = {};
-
 	const dependencies = getDependencyRegistry(context.file);
+	const cache = getCache(context.file);
 	const bundler = browserify(options);
 
-	// PR for browserify allowing to override mopt.resolve
-	// https://github.com/substack/node-browserify/blob/7fbaee2d1373f5f186bab98d80dbffaccd058d92/index.js#L460
 	bundler._bresolve = createResolver(dependencies);
+	const original = bundler._mdeps.readFile.bind(bundler._mdeps);
+
+	const readFile = (file, id, pkg) => {
+		if (file in cache) {
+			return cache[file];
+		}
+		if (file.includes('node_modules')) {
+			return original(file, id, pkg);
+		}
+		throw new Error(`Could not resolve ${file} as ${id} from ${context.file.path}`);
+	};
+
+	bundler._mdeps.readFile = readFile.bind(bundler._mdeps);
 
 	context.transforms.forEach(transform => {
 		const {fn, opts} = transform;
@@ -37,6 +41,19 @@ function createBundler(options: BrowserifyOptions, context: BundleContext): Bund
 	});
 
 	return bundler;
+}
+
+function getCache(file, seed = {}) {
+	return values(file.dependencies || {})
+		.reduce((cache, dependency) => {
+			if (dependency.path in cache) {
+				return cache;
+			}
+
+			const source = dependency.buffer.length ? dependency.buffer : '/*beep. boop.*/';
+			cache[dependency.path] = intoStream(source);
+			return getCache(dependency, cache);
+		}, seed);
 }
 
 type File = {

@@ -3,10 +3,11 @@
 import type {Readable} from 'stream';
 
 const memoize = require('lodash').memoize;
+const intoStream = require('into-stream');
+
 const bundle = require('./bundle');
 const bundleVendors = require('./bundle-vendors');
 const createBundler = require('./create-bundler');
-const createStream = require('./create-stream');
 const loadTransforms = memoize(require('./load-transforms'));
 
 module.exports = browserifyTransform;
@@ -21,10 +22,10 @@ function browserifyTransform(application: Application): Transform {
 	return async file => {
 		const transforms = await loadTransforms(config.transforms || {});
 		const bundler = createBundler(opts, {transforms, file});
+		const source = file.buffer.length ? file.buffer : '/*beep. boop.*/';
 
-		bundler.add(createStream(file.buffer), {
-			file: file.path
-		});
+		bundler.add(intoStream(source), {file: file.path});
+		vendorsConfig.forEach(vendor => bundler.external(vendor));
 
 		const userBundling = bundle(bundler);
 
