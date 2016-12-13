@@ -13,7 +13,7 @@
     "build": "babel source --out-dir distribution",
     "pretest": "npm run build && npm run deps && npm run lint",
     "test": "ava test/test-*.js",
-    "lint": "xo",
+    "lint": "test -z $APPVEYOR && xo || echo 'Skipping lint on AppVeyor'",
     "deps": "dependency-check . --missing && dependency-check . --extra --no-dev",
     "commit": "git-cz",
     "commitmsg": "conventional-changelog-lint -e",
@@ -53,6 +53,7 @@
   },
   "xo": {
     "esnext": true,
+    "extends": ["plugin:flowtype/recommended"],
     "parser": "babel-eslint",
     "plugins": [
       "flowtype",
@@ -118,7 +119,7 @@
     "eslint-plugin-flowtype-errors": "1.5.0",
     "flow-bin": "0.35.0",
     "husky": "0.11.9",
-    "xo": "0.17.0"
+    "xo": "0.17.1"
   },
   "dependencies": {
     "browser-resolve": "1.11.2",

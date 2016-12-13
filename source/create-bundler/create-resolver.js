@@ -5,8 +5,19 @@ module.exports = createResolver;
 
 const cwd = process.cwd();
 
-function createResolver(deps: Dependencies): Function {  // eslint-disable-line no-use-before-define
-	return (id: string, parent: ModuleContext, cb: Callback): void => {  // eslint-disable-line no-use-before-define
+type ModuleContext = {
+	id: string;
+	inNodeModules: boolean;
+};
+
+type Dependencies = {
+	[id: string]: Object;
+};
+
+type Callback = (err: null | Error, resolvedPath: string) => void;
+
+function createResolver(deps: Dependencies): Function {
+	return (id: string, parent: ModuleContext, cb: Callback): void => {
 		if (parent.inNodeModules) {
 			return browserResolve(id, parent, cb);
 		}
@@ -22,14 +33,3 @@ function createResolver(deps: Dependencies): Function {  // eslint-disable-line 
 		browserResolve(id, opts, cb);
 	};
 }
-
-type ModuleContext = { // eslint-disable-line no-undef
-	id: string;
-	inNodeModules: boolean;
-};
-
-type Dependencies = { // eslint-disable-line no-undef
-	[id: string]: Object;
-};
-
-type Callback = (err: null|Error, resolvedPath: string) => void; // eslint-disable-line no-undef
