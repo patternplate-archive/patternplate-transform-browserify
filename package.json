@@ -125,7 +125,7 @@
     "browser-resolve": "1.11.2",
     "browserify": "13.1.1",
     "into-stream": "3.0.0",
-    "lodash": "4.16.6",
+    "lodash": "4.17.2",
     "resolve": "1.1.7"
   }
 }
