@@ -12,6 +12,41 @@ const loadTransforms = memoize(require('./load-transforms'));
 
 module.exports = browserifyTransform;
 
+type BrowserifyEntry = Readable;
+
+type FileCache = {
+	[path: string]: Buffer;
+};
+
+type BrowserifyOptions = {
+	cache?: {};
+	fileCache?: FileCache;
+	packageCache?: {};
+	plugin?: Array<Function>;
+	require?: Array<BrowserifyEntry>;
+};
+
+type TransformBrowserifyOptions = {
+	opts?: BrowserifyOptions;
+	transforms?: {[transformName: string]: Object};
+	vendors?: Array<string>;
+};
+
+type Application = {
+	configuration: {
+		transforms: {
+			browserify: TransformBrowserifyOptions;
+		}
+	};
+};
+
+type File = {
+	buffer: Buffer;
+	path: string;
+};
+
+type Transform = (file: File) => Promise<File>;
+
 function browserifyTransform(application: Application): Transform {
 	const config = application.configuration.transforms.browserify;
 	const opts = config.opts || {};
@@ -37,38 +72,3 @@ function browserifyTransform(application: Application): Transform {
 		return file;
 	};
 }
-
-type BrowserifyEntry = Readable;
-
-type FileCache = {
-	[path: string]: Buffer;
-};
-
-type BrowserifyOptions = {
-	cache?: {};
-	fileCache?: FileCache;
-	packageCache?: {};
-	plugin?: Array<Function>;
-	require?: Array<BrowserifyEntry>;
-};
-
-type TransformBrowserifyOptions = {
-	opts?: BrowserifyOptions;
-	transforms?: {[transformName: string]: Object};
-	vendors?: Array<string>;
-};
-
-type File = {
-	buffer: Buffer;
-	path: string;
-};
-
-type Application = { // eslint-disable-line no-undef
-	configuration: {
-		transforms: {
-			browserify: TransformBrowserifyOptions;
-		}
-	};
-};
-
-type Transform = (file: File) => Promise<File>; // eslint-disable-line no-undef

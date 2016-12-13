@@ -53,6 +53,7 @@
   },
   "xo": {
     "esnext": true,
+    "extends": ["plugin:flowtype/recommended"],
     "parser": "babel-eslint",
     "plugins": [
       "flowtype",

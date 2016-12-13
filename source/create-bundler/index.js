@@ -88,7 +88,7 @@ type BundleContext = { // eslint-disable-line no-undef
 
 type Bundler = { // eslint-disable-line no-undef
 	add: (entry: Readable) => void;
-	bundle: (callback: (error: Error|null, result: Buffer) => void) => void;
+	bundle: (callback: (error: Error | null, result: Buffer) => void) => void;
 	external: (id: string) => void;
 	on: (eventName: string, callback: () => void) => void;
 	emit: (eventName: string) => void;
