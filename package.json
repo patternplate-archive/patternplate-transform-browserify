@@ -13,7 +13,7 @@
     "build": "babel source --out-dir distribution",
     "pretest": "npm run build && npm run deps && npm run lint",
     "test": "ava test/test-*.js",
-    "lint": "xo",
+    "lint": "test -z $APPVEYOR && xo || echo 'Skipping lint on AppVeyor'",
     "deps": "dependency-check . --missing && dependency-check . --extra --no-dev",
     "commit": "git-cz",
     "commitmsg": "conventional-changelog-lint -e",
