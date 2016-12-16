@@ -23,10 +23,8 @@ function createBundler(options: BrowserifyOptions, context: BundleContext): Bund
 		if (file in cache) {
 			return cache[file];
 		}
-		if (file.includes('node_modules')) {
-			return original(file, id, pkg);
-		}
-		throw new Error(`Could not resolve ${file} as ${id} from ${context.file.path}`);
+
+		return original(file, id, pkg);
 	};
 
 	bundler._mdeps.readFile = readFile.bind(bundler._mdeps);
