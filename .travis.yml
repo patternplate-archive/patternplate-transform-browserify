@@ -8,9 +8,6 @@ before_script:
 branches:
   only:
     - master
-cache:
-  directories:
-  - node_modules
 notifications:
   email:
     on_success: never
