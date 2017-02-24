@@ -126,6 +126,6 @@
     "browserify": "13.1.1",
     "into-stream": "3.1.0",
     "lodash": "4.17.3",
-    "resolve": "1.2.0"
+    "resolve": "1.3.1"
   }
 }
