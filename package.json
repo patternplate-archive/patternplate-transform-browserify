@@ -118,7 +118,7 @@
     "eslint-plugin-flowtype": "2.29.1",
     "eslint-plugin-flowtype-errors": "2.0.2",
     "flow-bin": "0.37.4",
-    "husky": "0.11.9",
+    "husky": "0.13.2",
     "xo": "0.17.1"
   },
   "dependencies": {
