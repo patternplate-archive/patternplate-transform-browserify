@@ -8,6 +8,7 @@ before_script:
 branches:
   only:
     - master
+    - /^greenkeeper/.*$/
 cache:
   directories:
   - node_modules
