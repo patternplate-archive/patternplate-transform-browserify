@@ -123,7 +123,7 @@
   },
   "dependencies": {
     "browser-resolve": "1.11.2",
-    "browserify": "13.1.1",
+    "browserify": "14.1.0",
     "into-stream": "3.1.0",
     "lodash": "4.17.3",
     "resolve": "1.2.0"
