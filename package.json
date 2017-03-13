@@ -110,7 +110,7 @@
     "babel-register": "6.24.0",
     "babel-runtime": "6.23.0",
     "conventional-changelog-cli": "1.2.0",
-    "conventional-changelog-lint": "1.1.1",
+    "conventional-changelog-lint": "1.1.2",
     "conventional-recommended-bump": "0.3.0",
     "cz-conventional-changelog": "2.0.0",
     "cz-conventional-changelog-lint": "0.1.3",
