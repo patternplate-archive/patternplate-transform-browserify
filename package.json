@@ -119,7 +119,7 @@
     "eslint-plugin-flowtype-errors": "3.0.1",
     "flow-bin": "0.42.0",
     "husky": "0.13.2",
-    "xo": "0.18.0"
+    "xo": "0.18.1"
   },
   "dependencies": {
     "browser-resolve": "1.11.2",
