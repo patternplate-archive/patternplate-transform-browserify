@@ -33,15 +33,32 @@ type TransformBrowserifyOptions = {
 	vendors?: Array<string>;
 };
 
+type Pattern = {
+	files: File[];
+	post: Function[];
+};
+
+type Resource = {
+	id: string;
+	pattern: Pattern | null;
+	type: string;
+	reference: boolean;
+	content: Promise<Buffer> | Promise<string>
+};
+
 type Application = {
 	configuration: {
 		transforms: {
 			browserify: TransformBrowserifyOptions;
 		}
 	};
+	resources: Resource[];
 };
 
 type File = {
+	pattern: Pattern;
+	ext: string;
+	basename: string;
 	buffer: Buffer;
 	path: string;
 };
@@ -90,8 +107,7 @@ function browserifyTransform(application: Application): Transform {
 			if (isOverridden) {
 				return;
 			}
-			console.log(file.path);
-			p(result);
+			p(result, file);
 		});
 
 		return file;
