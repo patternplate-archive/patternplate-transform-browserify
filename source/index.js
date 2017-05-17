@@ -2,11 +2,12 @@
 /* eslint-disable no-use-before-define */
 import type {Readable} from 'stream';
 
+const browserify = require('browserify');
 const memoize = require('lodash').memoize;
 const intoStream = require('into-stream');
+const resolveFrom = require('resolve-from');
 
 const bundle = require('./bundle');
-const bundleVendors = require('./bundle-vendors');
 const createBundler = require('./create-bundler');
 const loadTransforms = memoize(require('./load-transforms'));
 
@@ -32,15 +33,32 @@ type TransformBrowserifyOptions = {
 	vendors?: Array<string>;
 };
 
+type Pattern = {
+	files: File[];
+	post: Function[];
+};
+
+type Resource = {
+	id: string;
+	pattern: Pattern | null;
+	type: string;
+	reference: boolean;
+	content: Promise<Buffer> | Promise<string>
+};
+
 type Application = {
 	configuration: {
 		transforms: {
 			browserify: TransformBrowserifyOptions;
 		}
 	};
+	resources: Resource[];
 };
 
 type File = {
+	pattern: Pattern;
+	ext: string;
+	basename: string;
 	buffer: Buffer;
 	path: string;
 };
@@ -51,8 +69,26 @@ function browserifyTransform(application: Application): Transform {
 	const config = application.configuration.transforms.browserify;
 	const opts = config.opts || {};
 
-	const vendorsConfig = config.vendors || [];
-	const vendorBundling = bundleVendors(vendorsConfig);
+	const vendors = config.vendors || [];
+	const externals = vendors.map(v => Array.isArray(v) ? v[0] : v);
+
+	const resources = vendors.map(v => {
+		const isShim = Array.isArray(v);
+		const expose = isShim ? v[0] : v;
+		const vendorPath = isShim ? v[1] : v;
+		const resolved = resolveFrom(process.cwd(), vendorPath);
+		const content = bundleResource(resolved, {expose});
+
+		return {
+			id: `browserify/${v}`,
+			pattern: null,
+			type: 'js',
+			reference: true,
+			content
+		};
+	});
+
+	application.resources = [...(application.resources || []), ...resources];
 
 	return async file => {
 		const transforms = await loadTransforms(config.transforms || {});
@@ -60,15 +96,33 @@ function browserifyTransform(application: Application): Transform {
 		const source = file.buffer.length ? file.buffer : '/*beep. boop.*/';
 
 		bundler.add(intoStream(source), {file: file.path});
-		vendorsConfig.forEach(vendor => bundler.external(vendor));
+		externals.forEach(external => bundler.external(external));
 
-		const userBundling = bundle(bundler);
+		const result = bundle(bundler);
+		file.buffer = Buffer.from(await result);
 
-		file.buffer = Buffer.concat([
-			await vendorBundling,
-			await userBundling
-		]);
+		const isOverridden = file.basename === 'index' && `demo${file.ext}` in file.pattern.files;
+
+		(file.pattern.post || []).forEach(p => {
+			if (isOverridden) {
+				return;
+			}
+			p(result, file);
+		});
 
 		return file;
 	};
+}
+
+function bundleResource(id, opts) {
+	return new Promise((resolve, reject) => {
+		const b = browserify();
+		b.require(id, opts);
+		b.bundle((err, result) => {
+			if (err) {
+				return reject(err);
+			}
+			resolve(result);
+		});
+	});
 }

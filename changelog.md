@@ -1,3 +1,13 @@
+<a name="1.2.0"></a>
+# [1.2.0](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.7...v1.2.0) (2017-05-17)
+
+
+### Features
+
+* use server resource queue ([e640cb9](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/e640cb9))
+
+
+
 <a name="1.1.7"></a>
 ## [1.1.7](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.6...v1.1.7) (2016-11-17)
 

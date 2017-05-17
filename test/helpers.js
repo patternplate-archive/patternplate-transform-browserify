@@ -12,7 +12,8 @@ type FileMap = { // eslint-disable-line no-undef
 
 export function getFile(extender: Map): FileMap { // eslint-disable-line import/prefer-default-export
 	const file = {
-		path: 'mocks/index.js'
+		path: 'mocks/index.js',
+		pattern: {}
 	};
 	return merge({}, file, extender);
 }
