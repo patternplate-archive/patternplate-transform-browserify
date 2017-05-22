@@ -102,6 +102,7 @@
   ],
   "devDependencies": {
     "ava": "0.19.1",
+    "babel-cli": "6.24.1",
     "babel-eslint": "7.2.1",
     "babel-plugin-transform-flow-comments": "6.21.0",
     "babel-plugin-typecheck": "3.9.0",
