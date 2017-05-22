@@ -66,12 +66,9 @@ type Transform = (file: File) => Promise<File>;
 
 function browserifyTransform(application: Application): Transform {
 	const config = application.configuration.transforms.browserify;
-	const opts = config.opts || {};
 	const resolve = id => resolveFrom(process.cwd(), id);
 
 	const vendors = config.vendors || [];
-	const externals = vendors
-		.map(v => Array.isArray(v) ? v[0] : v);
 
 	const vendorBundler = vendors
 		.map(v => {
@@ -95,16 +92,16 @@ function browserifyTransform(application: Application): Transform {
 
 	application.resources = [...(application.resources || []), vendorResource];
 
-	return async file => {
+	return async (file, _, c) => {
 		const transforms = await loadTransforms(config.transforms || {});
-		const bundler = createBundler(opts, {transforms, file});
+		const bundler = createBundler(c.opts || {}, {transforms, file});
 		const source = file.buffer.length ? file.buffer : '/*beep. boop.*/';
 
 		bundler.add(intoStream(source), {file: file.path});
 
-		externals.forEach(external => {
-			bundler.external(external);
-		});
+		(c.vendors || [])
+			.map(v => Array.isArray(v) ? v[0] : v)
+			.forEach(e => bundler.external(e));
 
 		const result = bundle(bundler);
 		file.buffer = Buffer.from(await result);

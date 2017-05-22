@@ -1,3 +1,13 @@
+<a name="1.2.2"></a>
+## [1.2.2](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.2.1...v1.2.2) (2017-05-22)
+
+
+### Bug Fixes
+
+* ensure usage of mutated config if any ([8b3a052](https://github.com/sinnerschrader/patternplate-transform-browserify/commit/8b3a052))
+
+
+
 <a name="1.2.1"></a>
 ## [1.2.1](https://github.com/sinnerschrader/patternplate-transform-browserify/compare/v1.1.7...v1.2.1) (2017-05-22)
 
