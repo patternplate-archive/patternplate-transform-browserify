@@ -1,6 +1,6 @@
 {
   "name": "patternplate-transform-browserify",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "patternplate transform creating browserify bundles",
   "main": "distribution/index.js",
   "files": [
@@ -119,6 +119,7 @@
     "dependency-check": "2.8.0",
     "eslint-plugin-flowtype": "2.30.4",
     "eslint-plugin-flowtype-errors": "3.0.1",
+    "eslint-plugin-unicorn": "2.1.1",
     "flow-bin": "0.42.0",
     "husky": "0.13.2",
     "xo": "0.18.0"

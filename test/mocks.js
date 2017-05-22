@@ -23,7 +23,7 @@ export const emptyFile = getFile({
 });
 
 export const emptyBufferFile = getFile({
-	buffer: new Buffer(''),
+	buffer: Buffer.from(''),
 	path: 'empty/index.js',
 	dependencies: {}
 });

@@ -1,4 +1,3 @@
-/* @flow */
 /* eslint-disable no-use-before-define */
 import type {Readable} from 'stream';
 
@@ -52,7 +51,7 @@ type Application = {
 			browserify: TransformBrowserifyOptions;
 		}
 	};
-	resources: Resource[];
+	resources?: Resource[];
 };
 
 type File = {
@@ -68,27 +67,33 @@ type Transform = (file: File) => Promise<File>;
 function browserifyTransform(application: Application): Transform {
 	const config = application.configuration.transforms.browserify;
 	const opts = config.opts || {};
+	const resolve = id => resolveFrom(process.cwd(), id);
 
 	const vendors = config.vendors || [];
-	const externals = vendors.map(v => Array.isArray(v) ? v[0] : v);
+	const externals = vendors
+		.map(v => Array.isArray(v) ? v[0] : v);
 
-	const resources = vendors.map(v => {
-		const isShim = Array.isArray(v);
-		const expose = isShim ? v[0] : v;
-		const vendorPath = isShim ? v[1] : v;
-		const resolved = resolveFrom(process.cwd(), vendorPath);
-		const content = bundleResource(resolved, {expose});
+	const vendorBundler = vendors
+		.map(v => {
+			const isShim = Array.isArray(v);
+			const expose = isShim ? v[0] : v;
+			const vendorPath = isShim ? v[1] : v;
+			return {id: resolve(vendorPath), expose};
+		})
+		.reduce((b, v) => {
+			b.require(v.id, {expose: v.expose});
+			return b;
+		}, browserify());
 
-		return {
-			id: `browserify/${v}`,
-			pattern: null,
-			type: 'js',
-			reference: true,
-			content
-		};
-	});
+	const vendorResource = {
+		id: `browserify/vendors`,
+		pattern: null,
+		type: 'js',
+		reference: true,
+		content: bundle(vendorBundler)
+	};
 
-	application.resources = [...(application.resources || []), ...resources];
+	application.resources = [...(application.resources || []), vendorResource];
 
 	return async file => {
 		const transforms = await loadTransforms(config.transforms || {});
@@ -96,7 +101,10 @@ function browserifyTransform(application: Application): Transform {
 		const source = file.buffer.length ? file.buffer : '/*beep. boop.*/';
 
 		bundler.add(intoStream(source), {file: file.path});
-		externals.forEach(external => bundler.external(external));
+
+		externals.forEach(external => {
+			bundler.external(external);
+		});
 
 		const result = bundle(bundler);
 		file.buffer = Buffer.from(await result);
@@ -112,17 +120,4 @@ function browserifyTransform(application: Application): Transform {
 
 		return file;
 	};
-}
-
-function bundleResource(id, opts) {
-	return new Promise((resolve, reject) => {
-		const b = browserify();
-		b.require(id, opts);
-		b.bundle((err, result) => {
-			if (err) {
-				return reject(err);
-			}
-			resolve(result);
-		});
-	});
 }
