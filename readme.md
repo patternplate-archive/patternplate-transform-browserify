@@ -1,3 +1,6 @@
+> # ⚠️ Deprecated
+> Use instead: https://patternplate.github.io/ 
+
 # patternplate-transform-browserify [![stability][0]][1]
 
 [![npm version][2]][3] [![Travis branch][4]][5] [![Appveyor branch][6]][7]
